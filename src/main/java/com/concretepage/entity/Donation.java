@@ -10,93 +10,82 @@ public class Donation {
 
 	@Id
 	@GeneratedValue
-	private int order_id;
+	private int donation_id;
 	
-	private int org_id;
+	private int donation_type;
 	
-	private String org_name;
+	private String category_name;
 	
-	private String category;
+	private String category_size;
 	
-	private int weight;
+	private float category_weight;
 	
-	private int donation;
+	private int category_amount;
 	
 	private String user_name;
 
-	private String date;
-	
 	private String ts;
 	
 	public Donation() {}
 	
-	public Donation(int order_id, int org_id, 
-			String org_name, String category,
-			int weight, int donation, 
-			String user_name, String date) {
-		this.order_id = order_id;
-		this.org_id = org_id;
-		this.org_name = org_name;
-		this.category = category;
-		this.weight = weight;
-		this.donation = donation;
+	public Donation(int donation_id, int donation_type, 
+			String category_name, String category_size,
+			int category_weight, int category_amount, 
+			String user_name, String ts) {
+		this.donation_id = donation_id;
+		this.donation_type = donation_type;
+		this.category_name = category_name;
+		this.category_size = category_size;
+		this.category_weight = category_weight;
+		this.category_amount = category_amount;
 		this.user_name = user_name;
-		this.date = date;
-	}
-
-	public Donation(String org_name, String category, int weight,
-					String date)
-	{
-		this.org_name = org_name;
-		this.category = category;
-		this.weight = weight;
-		this.date = date;
+		this.ts = ts;
 	}
 	
-	public int getOrderId() {
-		return order_id;
+	public int getDonationId() {
+		return donation_id;
 	}
 	
-	public void setOrderId(int id) {
-		this.org_id = id;
+	public void setDonationId(int donation_id) {
+		this.donation_id = donation_id;
 	}
 	
-	public int getOrgId() {
-		return org_id;
+	public int getDonationType() {
+		return donation_type;
 	}
 	
-	public void setOrgId(int id) {
-		this.org_id = id;
+	public void setDonationType(int donation_type) {
+		this.donation_type = donation_type;
 	}
 	
-	public String getOrgName() {return org_name;}
+	public String getCategoryName() {return category_name;}
 	
-	public void setOrgName(String org) {
-		this.org_name = org;
+	public void setCategoryName(String category_name) {
+		this.category_name = category_name;
 	}
 	
-	public String getCategory() {
-		return category;
+	public String getCategorySize() {
+		return category_size;
 	}
 	
-	public void setCategory(String category) {
-		this.category = category;
+	public void setCategorySize(String category_size) {
+		this.category_size = category_size;
 	}
 	
-	public int getWeight() {
-		return weight;
+	public float getCategoryWeight() {
+		return category_weight;
 	}
 	
-	public void setWeight(int weight) {
-		this.weight = weight;
+	public void setCategoryWeight(int category_weight) {
+		this.category_weight = category_weight;
 	}
 	
-	public int getDonation() {
-		return donation;
+	public int getCategoryAmount() {
+		return category_amount;
 	}
 	
-	public void setDonation(int donation) {
-		this.donation = donation;
+	public void setCategoryAmount(int category_amount) {
+		this.category_amount = category_amount;
 	}
 	
 	public String getUserName() {
@@ -114,8 +103,4 @@ public class Donation {
 	public void setTs(String ts) {
 		this.ts = ts;
 	}
-
-	public String getDate() { return date; }
-
-	public void setDate(String date) { this.date = date;}
 }

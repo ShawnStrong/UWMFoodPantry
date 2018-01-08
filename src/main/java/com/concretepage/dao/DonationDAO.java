@@ -24,8 +24,6 @@ import com.concretepage.entity.Frequency;
 @Repository
 public class DonationDAO implements IntDonationDAO {
 
-
-
 	@PersistenceContext
 	private EntityManager entityManager;
 
