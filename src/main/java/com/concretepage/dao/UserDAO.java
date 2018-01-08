@@ -25,7 +25,7 @@ public class UserDAO implements IntUserDAO {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public int createUser(String username, String password, String user_email) {
+	public int createUser(String username, String password) {
 		// error codes:
 		// 0 for successful creation
 		// 1 for user already exists
@@ -37,11 +37,10 @@ public class UserDAO implements IntUserDAO {
 
 		if (users.isEmpty()) {
 			query = entityManager.createNativeQuery(
-					"INSERT INTO user_table (username,password,user_email) " +
-					" VALUES(?,?,?)");
+					"INSERT INTO user_table (username,password) " +
+					" VALUES(?,?)");
 	        	query.setParameter(1, username);
 	        	query.setParameter(2, password);
-	        	query.setParameter(3, user_email);
 	        	query.executeUpdate();
 	        
 	        return 0;
@@ -95,15 +94,4 @@ public class UserDAO implements IntUserDAO {
 		
 	}
 
-	@Override
-	public void initUserTable() {
-		Query query = entityManager.createNativeQuery("CREATE TABLE IF NOT EXISTS `user_table` (" + 
-				"  `user_id` int(5) NOT NULL AUTO_INCREMENT," + 
-				"  `username` TINYTEXT NOT NULL," + 
-				"  `password` TINYTEXT NOT NULL," + 
-				"  `user_email` TINYTEXT NOT NULL," +
-				"  PRIMARY KEY (`user_id`)" + 
-				") ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;");
-		query.executeUpdate();
-	}
 }

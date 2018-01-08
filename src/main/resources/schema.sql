@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS `user_table` (
 	user_id int(5) NOT NULL AUTO_INCREMENT, 
 	username TINYTEXT NOT NULL, 
 	password TINYTEXT NOT NULL, 
+	super_user int(1),
 	PRIMARY KEY (user_id) 
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 

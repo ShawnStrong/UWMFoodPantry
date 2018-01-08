@@ -22,10 +22,9 @@ public class UserController {
 	@GetMapping("create")
 	public @ResponseBody int createUser (
 			@RequestParam String username,
-			@RequestParam String password,
-			@RequestParam String user_email) {
+			@RequestParam String password) {
 
-		return userDAO.createUser(username, password, user_email);
+		return userDAO.createUser(username, password);
 	}
 	
 	@GetMapping("login")
@@ -43,12 +42,6 @@ public class UserController {
 			@RequestParam String newpassword) {
 			
 		return userDAO.changeUserPassword(username, oldpassword, newpassword);
-	}
-	
-	@GetMapping("init")
-	public @ResponseBody String initIncomingRecordTable() {
-		userDAO.initUserTable();
-		return "all good";
 	}
 	
 	@GetMapping("findIp")
