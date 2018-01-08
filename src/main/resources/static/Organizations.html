@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Organizations</title>
+	
+	<!-- bootstrap css -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+	
+	<!-- jquery -->
+    <script src="http://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+	
+	<!-- bootstrap -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+	
+	<!-- dynatable css and js -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Dynatable/0.3.1/jquery.dynatable.css">
+	<link rel="stylesheet" type="text/css" href="orgTable.css">
+	<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/Dynatable/0.3.1/jquery.dynatable.js"></script> -->
+	<script src="jquery.dynatable.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/annyang/2.6.0/annyang.min.js"></script>
+    <script src="bootstable.js"></script>
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script> 
+	
+	<!-- jQuery Tabledit plugin
+	<script src="jquery.tabledit.js"></script> -->
+	<style>
+	td {
+		white-space: pre;
+	}
+	textarea {
+		resize: vertical;
+	}
+	</style>
+	<script>		
+		$(document).ready(function() {	
+			var ip = location.host;
+			localStorage.setItem("serverIp", ip);
+		
+            //Add username to the navbar if it exists in local storage
+            var name = localStorage.getItem("username");
+            $("#username").prop("value",name);
+            
+            if (name != null && name.length > 0) {
+                $(".navbar .container-fluid #userAbsent").hide();
+                $(".navbar .container-fluid #userPresent li #user").html("Welcome " + name + "!");
+            } else {
+                $(".navbar .container-fluid #userPresent").hide();
+            }
+            
+            //Clear username on signout and go to the console page
+            $("#signOut").click(function() {
+               localStorage.removeItem("username");
+                window.location.href = "Console.html";
+            });
+			
+			
+			
+            /*if (name != null && name.length > 0) {
+                $(".navbar .container-fluid #userAbsent").hide();
+                $(".navbar .container-fluid #userPresent li #user").html("Welcome " + name + "!");
+            } else {
+                $(".navbar .container-fluid #userPresent").hide();
+            }
+
+            $("#signOut").click(function() {
+               localStorage.removeItem("username");
+                window.location.href = "Console.html";
+            });*/
+			
+			/* this makes a dynatable */
+			$( "#showOrg" ).click(function() {
+				/*var tablebox = document.getElementById("tablebox");
+				var formbox = document.getElementById("formbox");
+				// disable formbox if activated
+				if (formbox.style.display === "block") {
+					formbox.style.display = "none";
+				}
+				// enable tablebox if not activated
+				if (tablebox.style.display === "none") {
+					tablebox.style.display = "block";
+				}*/
+				
+				$("#tablebox").prop({hidden: false});
+				$("#formbox").prop({hidden: true});
+			
+				var mytable = $("#table1");
+                var form = $("#redirection").serialize();
+				$.ajax({
+					url: 'http://' + ip + '/org/list2',
+					type: "GET",
+					data: form,
+					dataType: "json",
+					success: function(data){
+						
+						$("#tableBody").empty();
+						$("#table1 thead tr th[name=buttons]").remove();
+                        //create columns dynamically
+						mytable.dynatable({
+							features: {
+								paginate: false,
+								perPageSelect: false
+							},
+							dataset: {
+								records: data
+							}
+						});
+						mytable.data('dynatable').settings.dataset.records = data;
+						mytable.data('dynatable').dom.update();
+						$("#table1").each(function(){
+                            $(this).find('th').addClass('dynatableTH');
+                        })
+                        $("#table1").each(function(){
+                            $(this).find('td').addClass('centerTD');
+                        })
+                        $("#table1").each(function(){
+                            $(this).find('tbody').addClass('editBody');
+                        })
+                        mytable.data('dynatable').paginationPerPage.set(1000);
+                        
+                        $("#tablebox .dynatable-per-page").hide();
+                        
+                        $("#dynatable-pagination-links-table1").hide();
+                        
+                        $("#dynatable-query-search-table1").val("");
+						
+						$('#table1').SetEditable({
+                            columnsEd: "1,2,3,4",
+							onDelete: function(columnsEd) {
+                                var orgName = columnsEd[0].childNodes[0].innerHTML;
+                                delOrg(orgName);
+                            },
+                            onEdit: function(columnsEd) {   
+                                var orgName = columnsEd[0].childNodes[0].innerHTML;
+                                var contact = columnsEd[0].childNodes[1].innerHTML;
+                                var number = columnsEd[0].childNodes[2].innerHTML;
+                                var email = columnsEd[0].childNodes[3].innerHTML;
+                                var notes = columnsEd[0].childNodes[4].innerHTML;
+                                editOrg(orgName, contact, number, email, notes);
+                            }
+						});
+					 }
+				});
+			}); 
+			
+			/* Function for limiting Dynatable's search field so it doesn't break Bootstable */
+			var lastSearch = "";
+			var currentSearch;
+            $(document).on("keypress", "#dynatable-query-search-table1", function(e) {
+				currentSearch = $("#dynatable-query-search-table1").val();
+                if (e.which == 13 && currentSearch != "" && currentSearch != lastSearch) {
+					lastSearch = currentSearch;
+                    $("#table1 thead tr th[name=buttons]").remove();
+                    $('#table1').SetEditable({
+                            columnsEd: "1,2,3,4",
+							onDelete: function(columnsEd) {
+                                var orgName = columnsEd[0].childNodes[0].innerHTML;
+                                delOrg(orgName);
+                            },
+                            onEdit: function(columnsEd) {   
+                                var orgName = columnsEd[0].childNodes[0].innerHTML;
+                                var contact = columnsEd[0].childNodes[1].innerHTML;
+                                var number = columnsEd[0].childNodes[2].innerHTML;
+                                var email = columnsEd[0].childNodes[3].innerHTML;
+                                var notes = columnsEd[0].childNodes[4].innerHTML;
+                                
+                                editOrg(orgName, contact, number, email, notes);
+                            }
+						});
+                }
+            });
+			
+			/* any time a column is resorted, reload the Bootstable addon */
+			$(document).on('click', ".dynatable-sort-header", function() {
+				$("#table1 thead tr th[name=buttons]").remove();
+				$('#table1').SetEditable({
+                    columnsEd: "1,2,3,4",
+					onDelete: function(columnsEd) {
+                        var orgName = columnsEd[0].childNodes[0].innerHTML;
+                        delOrg(orgName);
+                    },
+                    onEdit: function(columnsEd) {   
+                        var orgName = columnsEd[0].childNodes[0].innerHTML;
+                        var contact = columnsEd[0].childNodes[1].innerHTML;
+                        var number = columnsEd[0].childNodes[2].innerHTML;
+                        var email = columnsEd[0].childNodes[3].innerHTML;
+                        var notes = columnsEd[0].childNodes[4].innerHTML;
+                                
+                        editOrg(orgName, contact, number, email, notes);
+                    }
+				});
+				
+				$("#table1").each(function(){
+					$(this).find('th').addClass('dynatableTH');
+                })
+                $("#table1").each(function(){
+                    $(this).find('td').addClass('centerTD');
+                })
+                $("#table1").each(function(){
+                    $(this).find('tbody').addClass('editBody');
+                })
+			});
+            
+            function editOrg(orgName, contact, number, email, notes) {
+				//notes = notes.split("\n").join("aaaa");
+				//notes = notes.split("'").join("bbbb");
+				notes = encodeURIComponent(notes).replace(/[!'()*]/g, escape);
+				console.log(notes);
+                var editString = "?org_name=" + orgName + "&contact_name=" + contact + "&contact_number=" + number + "&contact_email=" + email + "&notes=" + notes;
+                
+                $.ajax({
+                    url: 'http://' + ip + '/org/update' + editString,
+                    type: "GET",
+                    success: function(data) {
+                        if (data == 0) {
+                            alert("Organization successfully updated.");
+                        } else {
+                            alert("Organization information was not updated.")
+                        }
+                    }
+                });
+            };
+            
+            function delOrg(orgName) {
+                var delString = "?org_name=" + orgName;
+                
+                $.ajax({
+                    url: 'http://' + ip + '/org/delete' + delString,
+                    type: "GET",
+                    success: function(data) {
+                        alert("Organization has been deleted.");
+                    }
+                });
+            };
+			
+			$("#addOrg").click(function() {
+				$("#tablebox").prop({hidden: true});
+				$("#formbox").prop({hidden: false});
+			});
+			
+            if (annyang) {
+              // Let's define our first command. First the text we expect, and then the function it should call
+              var commands = {                  
+                'open donations': function() {
+                  window.location.href = "Donations.html";
+                },
+                  
+                'show donations': function() {
+                  window.location.href = "Donations.html";
+                },
+                  
+                'go to donations': function() {
+                  window.location.href = "Donations.html";
+                },
+                
+                'open reports': function() {
+                  window.location.href = "Reports.html";
+                },
+                  
+                'show reports': function() {
+                  window.location.href = "Reports.html";
+                },
+                  
+                'go to reports': function() {
+                  window.location.href = "Reports.html";
+                }
+                  
+              };
+
+              // Add our commands to annyang
+              annyang.addCommands(commands);
+
+              // Start listening. You can call this here, or attach this call to an event, button, etc.
+              annyang.start();
+            }
+
+            // Submit the form
+            $("#submit").click(function() {
+              var form = $("form").serialize();
+
+              if ($("#inputOrg").val() == "" || $("#inputContactName").val() == "" || 
+                  $("#inputContactPhone").val() == "" || $("#inputContactEmail").val() == "") {
+                  alert("Please fill out all the information before submitting.");
+              } else {
+                // ("" + form);
+                  $.ajax({
+                      url : 'http://' + ip + '/org/create',
+                      type : 'GET',
+                      data : form,
+                      dataType:'json',
+                      success : function(data) {
+                          if (data == 0) {
+                              $( "#successfulOrgCreation" ).dialog({
+                                  modal: true,
+                                  open: function(event, ui){
+                                      setTimeout(function(){
+                                            $("#successfulOrgCreation").dialog('close');
+                                            window.location.href = "Organizations.html";
+                                        }, 1500);
+                                    }
+                                });
+                          } else {
+                              $( "#failedOrgCreation" ).dialog({
+                                  modal: true,
+                                  open: function(event, ui){
+                                      setTimeout(function(){
+                                            $("#failedOrgCreation").dialog('close');
+                                        }, 1500);
+                                    }
+                                });
+                          }
+                      },
+                      error : function(request,error) {
+                          alert("Org creation failed.");
+                      }
+                    });
+                }
+            });
+		});
+    </script>
+    
+</head>
+<body>
+    <form id="redirection">
+        <input type="hidden" id="username" name="user_name">
+    </form>
+	
+    <nav class="navbar navbar-inverse">
+      <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="Console.html">Just One More Ministry</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+          <ul class="nav navbar-nav">
+            <li><a href="Organizations.html">Organizations</a></li>
+            <li><a href="Donations.html">Donations</a></li>
+            <li><a href="Reports.html">Reports</a></li>
+          </ul>
+            <ul class="nav navbar-nav navbar-right" id="userAbsent">
+                <li><a href="Login.html">Login</a></li>
+                <li><a href="Register.html">Register</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right" id="userPresent">
+                <li><a id="user"></a></li>
+                <li><a href="" id="signOut">Sign Out</a></li>
+            </ul>
+        </div><!-- /.navbar-collapse -->
+      </div><!-- /.container-fluid -->
+    </nav>
+	
+	<!-- show and add buttons with functions -->
+	<div class="btn-group" align="center">
+		<button class="btn btn-primary" id="showOrg">Show Organizations</button>
+		<button class="btn btn-primary" id="addOrg">Add Organization</button>
+	</div>
+	
+	<br><br>
+			
+    <div class="container-fluid" id="formbox" hidden>
+        <form class="form-horizontal" name="orgForm">
+		  <div class="form-group col-lg-10 col-md-10 col-sm-10">
+            <label for="inputOrg" class="col-sm-2 control-label">Organization:</label>
+            <div class="col-sm-10">
+                <textarea rows="1" type="text" name="org_name" class="form-control" id="inputOrg" placeholder="Organization Name" style="height: 100px" required></textarea>
+            </div>
+          </div>
+		  <!--
+          <div class="form-group col-lg-10 col-md-10 col-sm-10">
+            <label for="inputOrg" class="col-sm-2 control-label">Organization:</label>
+            <div class="col-sm-10">
+              <input type="text" name="org_name" class="form-control" id="inputOrg" placeholder="Organization Name" required>
+            </div>
+          </div>
+		  -->
+          <div class="form-group col-lg-10 col-md-10 col-sm-10">
+            <label for="inputContactName" class="col-sm-2 control-label">Contact:</label>
+            <div class="col-sm-10">
+              <input type="text" name="contact_name" class="form-control" id="inputContactName" placeholder="Contact Name" required>
+            </div>
+          </div>
+          <div class="form-group col-lg-10 col-md-10 col-sm-10">
+            <label for="inputContactPhone" class="col-sm-2 control-label">Phone Number:</label>
+            <div class="col-sm-10">
+              <input type="text" name="contact_number" class="form-control" id="inputContactPhone" placeholder="Contact Phone Number" required>
+            </div>
+          </div>
+          <div class="form-group col-lg-10 col-md-10 col-sm-10">
+            <label for="inputContactEmail" class="col-sm-2 control-label">Email:</label>
+            <div class="col-sm-10">
+              <input type="text" name="contact_email" class="form-control" id="inputContactEmail" placeholder="Contact Email Address" required>
+            </div>
+          </div>
+          <div class="form-group col-lg-10 col-md-10 col-sm-10">
+            <label for="inputOrgNotes" class="col-sm-2 control-label">Description:</label>
+            <div class="col-sm-10">
+                <textarea type="text" name="notes" class="form-control" id="inputOrgNotes" placeholder="Organization Description" style="height: 100px"></textarea>
+            </div>
+          </div>
+        </form>
+        
+        <div class="col-sm-10">
+          <button id="submit" type="button" class="btn btn-default">Submit</button>
+        </div>
+        
+        <div id="successfulOrgCreation" title="Organization Created" hidden="hidden">
+          <p>
+            <span class="ui-icon ui-icon-circle-check" style="float:left; margin:0 7px 50px 0;"></span>
+            Your organization has been successfully added.
+          </p>
+        </div>
+
+        <div id="failedOrgCreation" title="Organization Not Created" hidden="hidden">
+          <p>
+            <span class="ui-icon ui-icon-circle-check" style="float:left; margin:0 7px 50px 0;"></span>
+            Your organization was not created. Please try again.
+          </p>
+        </div>
+    </div>
+
+	<br><br>
+	
+	<div id="tablebox" hidden>
+		<table id="table1" align="center">
+			<thead>
+				<th data-dynatable-column="org_name">Organization</th>
+				<th data-dynatable-column="contact_name">Contact</th>
+				<th data-dynatable-column="contact_number">Number</th>
+				<th data-dynatable-column="contact_email">Email</th>
+				<th>Notes</th>
+			</thead>
+			<tbody id="tableBody">
+			</tbody>
+        </table>
+	</div>
+	
+</body>
+</html>
