@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS `inventory_table` (
 	`category_quantity` int(7) NOT NULL,
 	`user_name` TINYTEXT NOT NULL,
 	`ts` TIMESTAMP,
-	PRIMARY KEY (donation_id)
+	PRIMARY KEY (category_id)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `category_table` (
