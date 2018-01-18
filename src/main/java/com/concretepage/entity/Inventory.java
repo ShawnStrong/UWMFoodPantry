@@ -7,7 +7,7 @@ import javax.persistence.Id;
 // (usually) represents a row in a table. Every variable in here is collected by Spring at runtime and
 // compiled into a bean called 'Partner'. Pretty neat, huh?
 @Entity
-public class Category {
+public class Inventory {
     @Id
     @GeneratedValue
     private int category_id;
@@ -18,30 +18,26 @@ public class Category {
 
     private float category_weight;
 
-    //private int category_quantity;
+    private int category_quantity;
 
-    //private String user_name;
+    public Inventory() {}
 
-    public Category() {}
-
-    public Category(int id, String name, String size,
-               float weight) {
+    public Inventory(int id, String name, String size,
+                    float weight) {
         this.category_id = id;
         this.category_name = name;
         this.category_size = size;
         this.category_weight = weight;
     }
-/*
-    public Category(int id, String name, String size,
-                    float weight, int quantity, String userName) {
+
+    public Inventory(int id, String name, String size, float weight, int quantity) {
         this.category_id = id;
         this.category_name = name;
         this.category_size = size;
         this.category_weight = weight;
         this.category_quantity = quantity;
-        this.user_name = userName;
     }
-*/
+
     public int getId() {
         return category_id;
     }
@@ -73,12 +69,8 @@ public class Category {
     public void setWeight(float weight) {
         this.category_weight = weight;
     }
-/*
     public int getQuantity() { return category_quantity; }
 
     public void setQuantity( int quantity ) { this.category_quantity=quantity; }
 
-    public String getUserName() { return user_name; }
-
-    public void setUserName( String userName) { this.user_name=userName; }*/
 }

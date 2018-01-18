@@ -256,7 +256,7 @@
                     $(".row #test").children().remove();
                     $(document.createElement('label')).prop({for: 'quantity'}).appendTo(".row #test");
                     $("label[for='quantity']").html("Quantity:");
-                    $(document.createElement('input')).prop({type: "quantity", class: "form-control",  name: "quantity", id: "quantity"}).appendTo(".row #test");
+                    $(document.createElement('input')).prop({type: "quantity", class: "form-control",  name: "category_quantity", id: "quantity"}).appendTo(".row #test");
 
                     $("button[type=submit]").show();
                     //<input type="number" class="form-control" id="quantity" name="quantity" value="0">
@@ -435,7 +435,6 @@
 
             <br/>
             <br/>
-            <input type="hidden" id="user_name" name="user_name">
         </form>
         <button type="submit" class="btn btn-primary" id="submit">Submit</button>
 

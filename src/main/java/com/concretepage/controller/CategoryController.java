@@ -73,14 +73,12 @@ public class CategoryController {
     }
 
     @GetMapping("input")
-    public @ResponseBody int updateOrg (
+    public @ResponseBody int input (
+            @RequestParam String user_name,
             @RequestParam String category_name,
-            @RequestParam String category_size,
-            @RequestParam String category_weight,
-            @RequestParam String category_quantity,
-            @RequestParam String user_name) {
+            @RequestParam String category_quantity) {
 
-        return categoryDAO.addToInventory(category_name, category_size, category_weight, category_quantity, user_name);
+        return categoryDAO.addToInventory(category_name, category_quantity, user_name);
     }
 
 }

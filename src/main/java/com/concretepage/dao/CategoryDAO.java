@@ -16,6 +16,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.concretepage.entity.Category;
+import com.concretepage.entity.Inventory;
 
 @Transactional
 @Repository
@@ -133,36 +134,55 @@ public class CategoryDAO implements IntCategoryDAO {
 
     @SuppressWarnings("unchecked")
     @Override
-    public int addToInventory(String category_name, String category_size, String category_weight, String category_quantity, String user_name) {
-        //check if you need to update
+    public int addToInventory(String category_name, String category_quantity, String user_name) {
+        category_name = category_name.replace("%20"," ");
+        //get size
+        String category_size = category_name.substring(category_name.lastIndexOf(" ")+1);
+        category_name = category_name.substring(0,category_name.lastIndexOf(" "));
+        System.out.println("Category Name: " + category_name);
+        System.out.println("Category Size: " + category_size);
+        //get weight
         Query query = entityManager.createNativeQuery(
-                "SELECT * FROM inventory_table WHERE (category_name='" +
+                "SELECT * FROM category_table WHERE (category_name='" +
                         category_name + "' and category_size='" + category_size +"');", Category.class);
-        List<Category> categories = query.getResultList();
-        float categoryWeight = Float.parseFloat(category_weight);
+
+        List<Category> categories1 = query.getResultList();
+        float category_weight = 0;
+        for (Category x: categories1)
+        {
+            category_weight = x.getWeight();
+        }
+        //check if you need to update
+        query = entityManager.createNativeQuery(
+                "SELECT * FROM inventory_table WHERE (category_name='" +
+                        category_name + "' and category_size='" + category_size +"');", Inventory.class);
+        List<Inventory> categories = query.getResultList();
+        float categoryWeight = category_weight;
         int categoryQuantity = Integer.parseInt(category_quantity);
         if (categories.isEmpty())
         {
             query = entityManager.createNativeQuery(
                     "INSERT INTO inventory_table SET category_name=?1, category_size=?2, " +
-                            "category_weight=?3, category_quantity=?4, user_name=?5");
+                            "category_weight=?3, category_quantity=?4");
             query.setParameter(1, category_name);
             query.setParameter(2, category_size);
             query.setParameter(3, categoryWeight);
             query.setParameter(4, categoryQuantity);
-            query.setParameter(5, user_name);
             query.executeUpdate();
         }
         else
         {
+            int quantity = 0;
+            for (Inventory x: categories)
+            {
+                quantity = x.getQuantity();
+            }
             query = entityManager.createNativeQuery(
-                    "UPDATE inventory_table SET category_name = ?1, category_size = ?2, category_weight = ?3" +
-                            " Where (category_name = ?4 and category_size = ?5)");
-            query.setParameter(1, category_name);
-            query.setParameter(2, category_size);
-            query.setParameter(3, categoryWeight);
-            query.setParameter(4, category_name);
-            query.setParameter(5, category_size);
+                    "UPDATE inventory_table SET category_quantity=?1" +
+                            " Where (category_name = ?2 and category_size = ?3)");
+            query.setParameter(1, quantity);
+            query.setParameter(2, category_name);
+            query.setParameter(3, category_size);
             query.executeUpdate();
         }
 
