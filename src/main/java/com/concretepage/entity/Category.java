@@ -18,6 +18,10 @@ public class Category {
 
     private float category_weight;
 
+    private int category_quantity;
+
+    private String user_name;
+
     public Category() {}
 
     public Category(int id, String name, String size,
@@ -26,6 +30,16 @@ public class Category {
         this.category_name = name;
         this.category_size = size;
         this.category_weight = weight;
+    }
+
+    public Category(int id, String name, String size,
+                    float weight, int quantity, String userName) {
+        this.category_id = id;
+        this.category_name = name;
+        this.category_size = size;
+        this.category_weight = weight;
+        this.category_quantity = quantity;
+        this.user_name = userName;
     }
 
     public int getId() {
@@ -59,4 +73,12 @@ public class Category {
     public void setWeight(float weight) {
         this.category_weight = weight;
     }
+
+    public int getQuantity() { return category_quantity; }
+
+    public void setQuantity( int quantity ) { this.category_quantity=quantity; }
+
+    public String getUserName() { return user_name; }
+
+    public void setUserName( String userName) { this.user_name=userName; }
 }

@@ -33,4 +33,6 @@ public interface IntCategoryDAO {
     public int updateCategory(String category_name, String category_size, String category_weight);
 
     public List<Category> listCategories();
+
+    public int addToInventory(String category_name, String category_size, String category_weight, String category_quantity, String user_name);
 }

@@ -139,26 +139,34 @@ public class CategoryDAO implements IntCategoryDAO {
                 "SELECT * FROM inventory_table WHERE (category_name='" +
                         category_name + "' and category_size='" + category_size +"');", Category.class);
         List<Category> categories = query.getResultList();
+        float categoryWeight = Float.parseFloat(category_weight);
+        int categoryQuantity = Integer.parseInt(category_quantity);
         if (categories.isEmpty())
         {
-
+            query = entityManager.createNativeQuery(
+                    "INSERT INTO inventory_table SET category_name=?1, category_size=?2, " +
+                            "category_weight=?3, category_quantity=?4, user_name=?5");
+            query.setParameter(1, category_name);
+            query.setParameter(2, category_size);
+            query.setParameter(3, categoryWeight);
+            query.setParameter(4, categoryQuantity);
+            query.setParameter(5, user_name);
+            query.executeUpdate();
         }
         else
         {
-            
+            query = entityManager.createNativeQuery(
+                    "UPDATE inventory_table SET category_name = ?1, category_size = ?2, category_weight = ?3" +
+                            " Where (category_name = ?4 and category_size = ?5)");
+            query.setParameter(1, category_name);
+            query.setParameter(2, category_size);
+            query.setParameter(3, categoryWeight);
+            query.setParameter(4, category_name);
+            query.setParameter(5, category_size);
+            query.executeUpdate();
         }
 
-        Query query = entityManager.createNativeQuery(
-                "INSERT INTO inventory_table SET org_id=(SELECT org_id FROM org_table WHERE org_name=?1)," +
-                        " org_name=?2, category=?3, weight=?4, donation=?5, user_name=?6, date=?7");
-        query.setParameter(1, org_name);
-        query.setParameter(2, org_name);
-        query.setParameter(3, category);
-        query.setParameter(4, weight);
-        query.setParameter(5, donation);
-        query.setParameter(6, user_name);
-        query.setParameter(7, date);
-        query.executeUpdate();
+
 
         return 0;
     }
