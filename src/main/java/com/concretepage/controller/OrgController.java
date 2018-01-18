@@ -78,6 +78,7 @@ public class OrgController {
 //	public @ResponseBody List<String> getCarList() {
 //	    return carService.getAllCars();
 //	}
+	/*
 	@GetMapping("list2")
 	public @ResponseBody String listPartner2(@RequestParam String user_name) {
 		if (user_name != "") {
@@ -91,7 +92,7 @@ public class OrgController {
 		}
 		String json = new Gson().toJson(lop);
 		return json;
-	}
+	}*/
 	
 	@GetMapping("init")
 	public @ResponseBody String initIncomingRecordTable() {

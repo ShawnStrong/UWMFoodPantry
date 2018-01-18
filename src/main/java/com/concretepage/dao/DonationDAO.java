@@ -66,6 +66,7 @@ public class DonationDAO implements IntDonationDAO {
 		return 0;
 	}
 	//select distinct org_name from donation_table where (ts between '2017-10-15 00:00:00' and '2017-10-15 23:59:59') and user_name = 'Adam';
+	/*
 	@Override
 	public List<String> getWidgetOrgs(String date, String username)
 	{
@@ -76,7 +77,7 @@ public class DonationDAO implements IntDonationDAO {
 
 		List<String> orgs = query.getResultList();
 		return orgs;
-	}
+	}*/
 
 	
 //	query = entityManager.createNativeQuery(
@@ -93,10 +94,10 @@ public class DonationDAO implements IntDonationDAO {
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<Donation> showDonations(String org_name){
+	public List<Donation> showDonations(String date){
 		Query query = entityManager.createNativeQuery(
-				"SELECT * FROM donation_table WHERE org_name = ?1", Donation.class);
-		query.setParameter(1, org_name);
+				"SELECT * FROM donation_table WHERE date = ?1", Donation.class);
+		query.setParameter(1, date);
 //		Query query = entityManager.createNativeQuery(
 //				"SELECT * FROM donation_table WHERE " +
 //						"org_name = '" + org_name +"';", Donation.class);
@@ -114,7 +115,7 @@ public class DonationDAO implements IntDonationDAO {
 		query.executeUpdate();
 		return 1;
 	}
-
+/*
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<String> listOrg(int donation) {
@@ -125,8 +126,8 @@ public class DonationDAO implements IntDonationDAO {
 
 		List<String> orgs = query.getResultList();
 		return orgs;
-	}
-
+	}*/
+/*
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<Donation> listInfo(String org_name, int donation) {
@@ -137,7 +138,7 @@ public class DonationDAO implements IntDonationDAO {
 
 		List<Donation> donations = query.getResultList();
 		return donations;
-	}
+	}*/
 
 	@Override
 	public void initDonationTable() {
@@ -157,7 +158,7 @@ public class DonationDAO implements IntDonationDAO {
 		query.executeUpdate();
 	}
 
-	@SuppressWarnings("unchecked")
+	/*@SuppressWarnings("unchecked")
 	@Override
 	public List<String> getFrequency(String org_name)
 	{
@@ -218,8 +219,8 @@ public class DonationDAO implements IntDonationDAO {
 
 		query.executeUpdate();
 		return 0;
-	}
-
+	}*/
+/*
 	@SuppressWarnings("unchecked")
 	@Override
 	public String getUserPage(String user_name, String date) {
@@ -235,8 +236,9 @@ public class DonationDAO implements IntDonationDAO {
 		} else {
 			return pages.get(0);
 		}
-	}
-
+	}*/
+	//}*/
+/*
 	@Override
 	public int inputReportPrediction(String user_name, String tr, String io, String sd) {
 		Query query = entityManager.createNativeQuery(
@@ -249,7 +251,7 @@ public class DonationDAO implements IntDonationDAO {
 
 		query.executeUpdate();
 		return 0;
-	}
+	}*/
 
 //	.___  __         .__  .__                  _________              __  .__
 //	|   |/  |______  |  | |__|____    ____    /   _____/ ____   _____/  |_|__| ____   ____
@@ -359,10 +361,23 @@ public class DonationDAO implements IntDonationDAO {
 
 	@SuppressWarnings("unchecked")
 	@Override
+	public List<Object> getInventory()
+	{
+		//query inventory
+		Query query = null;
+		query = entityManager.createNativeQuery(
+				"SELECT * FROM `inventory_table`"
+						+ " ORDER BY category_name, category_size;", Donation.class);
+		return query.getResultList();
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
 	public List<Object> getReport(int donation, int time, int type, String start_date, String end_date) {
 		//time == 2 means yearly report time == 1 means monthly report time == 0 means weekly report
 		//type == 1 means they want a summary report i.e no food categories, just total weight
 		//type == 0 means they want a descriptive report i.e they want to tsee food categories
+
 		System.out.println("\n" + "Start Date: " + start_date);
 		System.out.println("\n" + "end Date: " + end_date);
 		Query query = entityManager.createNativeQuery(
@@ -375,7 +390,7 @@ public class DonationDAO implements IntDonationDAO {
 				+ " WHERE (ts BETWEEN '" + start_date + " 00:00:00' AND '"
 				+ end_date + " 00:00:00') AND "
 				+ "donation=" + donation + " ORDER BY org_name, category;", Donation.class);*/
-
+/*
 		Query querySummary = entityManager.createNativeQuery(
 				"SELECT * FROM `donation_table`"
 						+ " WHERE (date >= '" + start_date + "' AND date <= '"
@@ -419,11 +434,12 @@ public class DonationDAO implements IntDonationDAO {
 			String lastTsDay = lastTs.substring(8,10);
 			*/
 			//testing
-			firstTs = donationsTimeSorted.get(0).getDate();
+		/*
+			firstTs = donationsTimeSorted.get(0).getTs();
 			String firstTsYear = firstTs.substring(0,4);
 			String firstTsMonth = firstTs.substring(5,7);
 			String firstTsDay = firstTs.substring(8,10);
-			lastTs = donationsTimeSorted.get(donationListSize - 1).getDate();
+			lastTs = donationsTimeSorted.get(donationListSize - 1).getTs();
 			String lastTsYear = lastTs.substring(0,4);
 			String lastTsMonth = lastTs.substring(5,7);
 			String lastTsDay = lastTs.substring(8,10);
@@ -857,10 +873,10 @@ public class DonationDAO implements IntDonationDAO {
 				return listsToReturn;
 			}
 		}
-
+		*/
 		return null;
 	}
-
+/*
 	private String[] getMonthTimeRange(int MonthsSpanned, String firstTsYear, String firstTsMonth, String firstTs, String lastTs)
 	{
 		String timeRangeArray[] = new String[MonthsSpanned+1];
@@ -1179,5 +1195,5 @@ public class DonationDAO implements IntDonationDAO {
 			donationListIdx++;
 		}
 		return donationListToReturn;
-	}
+	}*/
 }

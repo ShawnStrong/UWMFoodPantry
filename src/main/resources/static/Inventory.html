@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Inventory</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <script src="http://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script src="http://rawgithub.com/indrimuska/jquery-editable-select/master/dist/jquery-editable-select.min.js"></script>
+    <link href="http://rawgithub.com/indrimuska/jquery-editable-select/master/dist/jquery-editable-select.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/annyang/2.6.0/annyang.min.js"></script>
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+    <!-- dynatable css and js -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Dynatable/0.3.1/jquery.dynatable.css">
+    <link rel="stylesheet" type="text/css" href="dynatableTH.css">
+    <!--<script src="jquery.dynatable.js"></script> -->
+    <script type='text/javascript' src='https://s3.amazonaws.com/dynatable-docs-assets/js/jquery.dynatable.js'></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/annyang/2.6.0/annyang.min.js"></script>
+    <script src="donationsBootstable.js"></script>
+
+    <style>
+        #suggestionWidget p:hover{
+            cursor: pointer;
+        }
+    </style>
+
+    <script>
+        $( document ).ready(function() {
+            var ip = location.host;
+            localStorage.setItem("serverIp", ip);
+
+            //Hide submit button until an org is selected
+            $("button[type=submit]").hide();
+
+            //Add username to the navbar if it exists in local storage
+            var name = localStorage.getItem("username");
+            $("#username").prop("value", name);
+
+            if (name != null && name.length > 0) {
+                $(".navbar .container-fluid #userAbsent").hide();
+                $(".navbar .container-fluid #userPresent li #user").html("Welcome " + name + "!");
+            } else {
+                $(".navbar .container-fluid #userPresent").hide();
+            }
+
+            //Clear username on signout and go to the console page
+            $("#signOut").click(function () {
+                localStorage.removeItem("username");
+                window.location.href = "Console.html";
+            });
+
+            //Generate the list of Categories
+            $.ajax({
+                // The URL for the request
+                url: 'http://' + ip + '/category/list',
+
+                // Whether this is a POST or GET request
+                type: "GET",
+
+                // The type of data we expect back
+                dataType : "json",
+            })
+            // Code to run if the request succeeds (is done);
+            // The response is passed to the function
+                .done(function (data) {
+                    $.each(data, function () {
+                        $(document.createElement('option')).prop({text: this.name + " " +this.size}).appendTo(".row #inputPlace #base");
+                        $(document.createElement('option')).prop({text: this.name}).appendTo(".row #showPlace #showOrgSelect");
+                    })
+                    $('.row #inputPlace #base').editableSelect();
+                    $('.row #showPlace #showOrgSelect').editableSelect();
+                })
+                // Code to run if the request fails; the raw request and
+                // status codes are passed to the function
+                .fail(function (xhr, status, errorThrown) {
+                    alert("Sorry, there was a problem!");
+                });
+
+            //Adds donations into the inventory
+            /*
+            $.ajax({
+                // The URL for the request
+                url: 'http://' + ip + '/donation/addToInventory',
+
+                // Whether this is a POST or GET request
+                type: "GET",
+
+                // The type of data we expect back
+                dataType: "json",
+            })
+            // Code to run if the request succeeds (is done);
+            // The response is passed to the function
+                .done(function (data) {
+                    $.each(data, function () {
+                        $(document.createElement('option')).prop({text: this.name}).appendTo(".row #inputPlace #base");
+                        $(document.createElement('option')).prop({text: this.name}).appendTo(".row #showPlace #showOrgSelect");
+                    })
+                    $('.row #inputPlace #base').editableSelect();
+                    $('.row #showPlace #showOrgSelect').editableSelect();
+                })
+            // Code to run if the request fails; the raw request and
+            // status codes are passed to the function
+            .fail(function (xhr, status, errorThrown) {
+                    alert("Sorry, there was a problem!");
+            });
+            */
+
+            $("#addInventory").click(function() {
+                $("#showOrgBox").prop({hidden: true});
+                $("#tablebox").prop({hidden: true});
+                $("#pageInfo").prop({hidden: false});
+            });
+
+            $("#updateInventory").click(function () {
+                $("#tablebox").prop({hidden: false});
+                $("#formbox").prop({hidden: true});
+                var mytable = $("#table1");
+                var form = $("#redirection").serialize();
+                $.ajax({
+                    url: 'http://' + ip + '/donation/updateInventory',
+                    type: "GET",
+                    data: form,
+                    dataType: "json",
+                    success: function(data){
+
+                        $("#tableBody").empty();
+                        $("#table1 thead tr th[name=buttons]").remove();
+                        //create columns dynamically
+                        mytable.dynatable({
+                            features: {
+                                paginate: false,
+                                perPageSelect: false
+                            },
+                            dataset: {
+                                records: data
+                            }
+                        });
+                        mytable.data('dynatable').settings.dataset.records = data;
+                        mytable.data('dynatable').dom.update();
+                        $("#table1").each(function(){
+                            $(this).find('th').addClass('dynatableTH');
+                        })
+                        $("#table1").each(function(){
+                            $(this).find('td').addClass('centerTD');
+                        })
+                        $("#table1").each(function(){
+                            $(this).find('tbody').addClass('editBody');
+                        })
+                        mytable.data('dynatable').paginationPerPage.set(1000);
+
+                        $("#tablebox .dynatable-per-page").hide();
+
+                        $("#dynatable-pagination-links-table1").hide();
+
+                        $("#dynatable-query-search-table1").val("");
+
+                        $('#table1').SetEditable({
+                            columnsEd: "2",
+                            onDelete: function(columnsEd) {
+                                var name = columnsEd[0].childNodes[0].innerHTML;
+                                var size = columnsEd[0].childNodes[1].innerHTML;
+                                delCategory(name,size);
+                            },
+                            onEdit: function(columnsEd) {
+                                var name = columnsEd[0].childNodes[0].innerHTML;
+                                var size = columnsEd[0].childNodes[1].innerHTML;
+                                var weight = columnsEd[0].childNodes[2].innerHTML;
+                                editCategory(name,size,weight);
+                            }
+                        });
+                    }
+                });
+
+                function editCategory(name, size, weight) {
+                    var editString = "?category_name=" + name + "&category_size=" + size + "&category_weight=" + weight;
+
+                    $.ajax({
+                        url: 'http://' + ip + '/category/update' + editString,
+                        type: "GET",
+                        success: function(data) {
+                            if (data == 0) {
+                                alert("Organization successfully updated.");
+                            } else {
+                                alert("Organization information was not updated.")
+                            }
+                        }
+                    });
+                };
+
+                function delCategory(name, size) {
+                    var delString = "?category_name=" + name + "&category_size=" + size;
+
+                    $.ajax({
+                        url: 'http://' + ip + '/category/delete' + delString,
+                        type: "GET",
+                        success: function(data) {
+                            alert("Organization has been deleted.");
+                        }
+                    });
+                };
+            });
+
+            $("#addInventory").click(function() {
+                $("#tablebox").prop({hidden: true});
+                $("#formbox").prop({hidden: false});
+            });
+
+            // Submit the form
+            $("#submit").click(function() {
+                var form = $("form").serialize();
+
+                if ($("#inputCategory").val() == "" || $("#inputCategorySize").val() == "" ||
+                    $("#inputCategoryWEight").val() == "") {
+                    alert("Please fill out all the information before submitting.");
+                } else {
+                    // ("" + form);
+                    $.ajax({
+                        url : 'http://' + ip + '/category/create',
+                        type : 'GET',
+                        data : form,
+                        dataType:'json',
+                        success : function(data) {
+                            if (data == 1) {
+                                $( "#successfulOrgCreation" ).dialog({
+                                    modal: true,
+                                    open: function(event, ui){
+                                        setTimeout(function(){
+                                            $("#successfulOrgCreation").dialog('close');
+                                            window.location.href = "category.html";
+                                        }, 1500);
+                                    }
+                                });
+                            } else {
+                                $( "#failedOrgCreation" ).dialog({
+                                    modal: true,
+                                    open: function(event, ui){
+                                        setTimeout(function(){
+                                            $("#failedOrgCreation").dialog('close');
+                                        }, 1500);
+                                    }
+                                });
+                            }
+                        },
+                        error : function(request,error) {
+                            alert("Org creation failed.");
+                        }
+                    });
+                }
+            });
+
+            //If the user clicks on an org on 'input donation' tab with their mouse
+            $(document).on("click",".row #inputPlace ul",function() {
+                if ($(".row #inputPlace #base").val().length > 0) {
+                    var category =[];
+                    var OrgsName = $("#inputPlace #base").serialize().toString();
+                    $(document.createElement('label')).prop({for: 'quantity'}).appendTo(".row #test");
+                    $("label[for='quantity']").html("Quantity:");
+                    $(document.createElement('input')).prop({type: "quantity", class: "form-control",  name: "quantity"}).appendTo(".row #test");
+
+                    $("button[type=submit]").show();
+                    //<input type="number" class="form-control" id="quantity" name="quantity" value="0">
+                    /*
+                    $.ajax({
+                        url: 'http://' + ip + '/donation/frequency',
+                        type: 'GET',
+                        data: {org_name:OrgsName} ,
+                        dataType : "json",
+                    })
+
+                        .done(function(data) {
+                            $.each(data, function() {
+                                category.push(this);
+                            })
+
+                            $(".row #test").children().remove();
+
+                            if ($(".navbar .container-fluid #userPresent li #user").html() == "") {
+                                category = ["bakery", "dairy", "deli", "meat", "pantry", "produce", "pet_food", "nonfood"];
+                            }
+
+                            for (var i = 0; i < category.length; i++) {
+                                $(document.createElement('label')).prop({for: category[i]}).appendTo(".row #test");
+                                var label = category[i];
+                                label = label.toLowerCase().replace(/\b[a-z]/g, function(letter) {
+                                    return letter.toUpperCase();
+                                });
+                                $("label[for='" + category[i] + "']").html(label + ":");
+                                category[i] = category[i].replace(/\s+/g, '_').toLowerCase();
+                                $(document.createElement('input')).prop({type: "number", class: "form-control", min: 0, value: 0, name: category[i]}).appendTo(".row #test");
+                            }
+
+                            $(document.createElement('label')).prop({for: 'date'}).appendTo(".row #test");
+                            $("label[for='date']").html("Date:");
+                            $(document.createElement('input')).prop({type: "date", class: "form-control",  name: "date"}).appendTo(".row #test");
+
+                            $("button[type=submit]").show();
+
+
+                        })
+
+                        .fail(function(jqXHR, textStatus, errorThrown) {
+                            alert( "Sorry, there was a problem!" );
+                        });*/
+
+
+                }
+            });
+
+            //If the user clicks on an org on 'show donations' tab with their mouse
+            $(document).on("click",".row #showPlace ul",function() {
+                if ($(".row #showPlace #showOrgSelect").val().length > 0) {
+                    var mytable = $("#donationtable");
+                    var OrgsName = $("#showPlace #showOrgSelect").serialize().toString();
+                    $.ajax({
+                        url: 'http://' + ip + '/donation/showDonations',
+                        type: 'GET',
+                        data: {org_name:OrgsName},
+                        dataType : "json",
+                        success: function(data){
+                            //convert donation integers to strings
+                            for( var k = 0; k < data.length; ++k ) {
+                                if( data[k]["donation"] == 0 ) {
+                                    data[k]["donation"] = "Outgoing";
+                                } else {
+                                    data[k]["donation"] = "Incoming";
+                                }
+                            }
+                            $("#tableBody").empty();
+                            $("#donationtable thead tr th[name=buttons]").remove();
+                            //create columns dynamically
+                            mytable.dynatable({
+                                features: {
+                                    paginate: false,
+                                    perPageSelect: false
+                                },
+                                dataset: {
+                                    records: data
+                                }
+                            });
+                            mytable.data('dynatable').settings.dataset.records = data;
+                            mytable.data('dynatable').dom.update();
+                            $("#donationtable").each(function(){
+                                $(this).find('th').addClass('dynatableTH');
+                            })
+                            $("#donationtable").each(function(){
+                                $(this).find('td').addClass('centerTD');
+                            })
+                            $("#donationtable").each(function(){
+                                $(this).find('tbody').addClass('editBody');
+                            })
+                            mytable.data('dynatable').paginationPerPage.set(10000);
+
+                            $("#tablebox .dynatable-per-page").hide();
+                            $("#dynatable-pagination-links-table1").hide();
+                            $("#dynatable-query-search-table1").val("");
+                            $('#donationtable').SetEditable({
+                                columnsEd: "1,2,3,4",
+                                onDelete: function(columnsEd) {
+                                    var donation_id = columnsEd[0].childNodes[0].innerHTML;
+                                    delDonation(donation_id);
+                                }
+                            });
+                        }
+                    })
+                    $("#tablebox").prop({hidden: false});
+                }
+            });
+        });
+    </script>
+
+</head>
+<body>
+    <form id="redirection">
+        <input type="hidden" id="username" name="user_name">
+    </form>
+
+    <nav class="navbar navbar-inverse">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="Console.html">UWM Food Pantry</a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li><a href="Inventory.html">Inventory</a></li>
+                    <li><a href="Reports.html">Reports</a></li>
+                    <li><a href="Category.html">Categories</a></li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right" id="userAbsent">
+                    <li><a href="Login.html">Login</a></li>
+                    <li><a href="Register.html">Register</a></li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right" id="userPresent">
+                    <li><a id="user"></a></li>
+                    <li><a href="" id="signOut">Sign Out</a></li>
+                </ul>
+            </div><!-- /.navbar-collapse -->
+        </div><!-- /.container-fluid -->
+    </nav>
+    <div class="btn-group" align="center">
+        <button class="btn btn-primary" id="addInventory">Add Items To Inventory</button>
+        <button class="btn btn-primary" id="updateInventory">Count Items In Inventory</button>
+        <button class="btn btn-primary" id="pastEntries">Edit Entries</button>
+    </div>
+
+    <br><br>
+
+    <div class="container-fluid" id="pageInfo" hidden>
+        <form action="/category/input">
+
+            <div class="row form-group">
+                <div class="col-lg-3 col-md-3 col-sm-1"></div>
+                <div class="col-lg-6 col-md-6 col-sm-10" id="inputPlace">
+                    <label for="base">Category Name:</label>
+                    <select class="form-control" id="base" name="category_name" required>
+
+                    </select>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-3 col-md-3 col-sm-1"></div>
+                <div id="test" class="form-group col-lg-6 col-md-6 col-sm-5">
+
+                </div>
+            </div>
+
+            <br/>
+            <br/>
+            <input type="hidden" id="user_name" name="user_name">
+        </form>
+        <button type="submit" class="btn btn-primary" id="submit">Submit</button>
+
+
+        <div id="successfulDonation" title="Donation complete" hidden="hidden">
+            <p>
+                <span class="ui-icon ui-icon-circle-check" style="float:left; margin:0 7px 50px 0;"></span>
+                Your donation has been successfully added.
+            </p>
+        </div>
+
+        <div id="failedDonation" title="Donation complete" hidden="hidden">
+            <p>
+                <span class="ui-icon ui-icon-circle-check" style="float:left; margin:0 7px 50px 0;"></span>
+                Your donation has been unsuccessful. Please try again.
+            </p>
+        </div>
+    </div>
+
+    <br><br>
+    <div id="tablebox" hidden>
+        <table id="table1" align="center">
+            <thead>
+            <th data-dynatable-column="name">Category</th>
+            <th data-dynatable-column="size">Size</th>
+            <th data-dynatable-column="weight">Weight</th>
+            </thead>
+            <tbody id="tableBody">
+            </tbody>
+        </table>
+    </div>
+
+</body>
+</html>

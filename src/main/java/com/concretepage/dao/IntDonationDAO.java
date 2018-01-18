@@ -25,32 +25,36 @@ import com.concretepage.entity.Frequency;
 
 public interface IntDonationDAO {
 	
-	public List<String> listOrg(int donation);
+	//public List<String> listOrg(int donation);
 	
-	public List<Donation> listInfo(String org_name,
-			int donation);
+	/*public List<Donation> listInfo(String org_name,
+			int donation);*/
 
-	public List<String> getFrequency(String org_name);
+	//public List<String> getFrequency(String org_name);
 
 	void initDonationTable();
 
 	List<Object> getReport(int donation, int time, int type, String start_date, String end_date);
 
-	public List<String> getWidgetOrgs(String date, String username);
+	//public List<String> getWidgetOrgs(String date, String username);
 
-	public int inputPage(String user_name, String page);
+	//public int inputPage(String user_name, String page);
 
-	public int inputReportPrediction(String user_name, String tr, String io, String sd);
+	//public int inputReportPrediction(String user_name, String tr, String io, String sd);
 
-	String getUserPage(String user_name, String ts);
+	//String getUserPage(String user_name, String ts);
 
 	int inputDonation(String org_name, String user_name, String category, int weight, int donation, String date);
 
-	List<Donation> showDonations(String org_name);
+	List<Donation> showDonations(String date);
+
+	public List<Object> getInventory();
 
 	public int deleteDonation(String order_id);
 
 	public List<Donation> getDonations(int type, int donation, String startDate, String endDate);
 	
 	public List<Donation> getDonationTimesSorted(int donation, String start_Date, String end_Date);
+
+	//public List<Object> getInventory(int donation, int time, int type, String start_date, String end_date);
 }

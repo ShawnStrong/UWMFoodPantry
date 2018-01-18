@@ -38,6 +38,7 @@ public class DonationService implements IntDonationService {
 	/**
 	 * Create separate donations from bulk donation payload from UI
 	 */
+	/*
 	@Override
 	public String separateDonations(int donation, String org_name, String user_name,
 			int deli, int dairy, int meat, int produce, int pantry, int bakery, 
@@ -454,10 +455,12 @@ public class DonationService implements IntDonationService {
 		
 		return allData;
 	}
-	
+	/*
 	public JSONObject constructReport(int donation, int time, 
 			int type, String start_date, String end_date) {
-
+		return null;
+	}*/
+/*
 		List<Donation> donations = donationDAO.getDonations(type, donation, start_date, end_date);
 		for (Donation x: donations)
 		{
@@ -616,7 +619,7 @@ public class DonationService implements IntDonationService {
 					formattedDonationListWeightsAdded.add(tempDonation);
 				}
 			}
-			 */
+
 			else if(cnt == formattedDonationListWeightsNotAdded.size() - 1)
 			{
 				if (x.getOrgName().equals(tempOrgName) && x.getDate().equals(tempDateRange) && x.getCategory().equals(tempCategory))
@@ -1111,7 +1114,7 @@ public class DonationService implements IntDonationService {
 		}
 		return timeList;
 	}
-/*
+
 	private List<SummaryReport> fillWeeklySummaryList(List<String> timeList, List<Donation> donationsSummary)
 	{
 		int donationListSize = donationsSummary.size();
@@ -1256,7 +1259,7 @@ public class DonationService implements IntDonationService {
 		}
 		return reportList;
 	}
-*/
+
 	private List<Donation> insertZeros(List<Donation> donationListToReturn, String[] timeRangeArray)
 	{
 		for (int i = 0; i < timeRangeArray.length; i++)
@@ -1400,7 +1403,7 @@ public class DonationService implements IntDonationService {
 			timeRangeArrayIdx++;
 			lastObjectUsed = donationListToReturn.get(donationListIdx);
 			donationListIdx++;
-		}*/
+		}
 		return donationListToReturn;
-	}
+	}*/
 }

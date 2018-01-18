@@ -2,9 +2,317 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Categories</title>
+    <!-- bootstrap css -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+    <!-- jquery -->
+    <script src="http://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+
+    <!-- bootstrap -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+    <!-- dynatable css and js -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Dynatable/0.3.1/jquery.dynatable.css">
+    <link rel="stylesheet" type="text/css" href="orgTable.css">
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/Dynatable/0.3.1/jquery.dynatable.js"></script> -->
+    <script src="jquery.dynatable.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/annyang/2.6.0/annyang.min.js"></script>
+    <script src="bootstable.js"></script>
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+    <!-- jQuery Tabledit plugin
+    <script src="jquery.tabledit.js"></script> -->
+    <style>
+        td {
+            white-space: pre;
+        }
+        textarea {
+            resize: vertical;
+        }
+    </style>
+    <script>
+        $(document).ready(function() {
+            var ip = location.host;
+            localStorage.setItem("serverIp", ip);
+
+            //Add username to the navbar if it exists in local storage
+            var name = localStorage.getItem("username");
+            $("#username").prop("value",name);
+
+            if (name != null && name.length > 0) {
+                $(".navbar .container-fluid #userAbsent").hide();
+                $(".navbar .container-fluid #userPresent li #user").html("Welcome " + name + "!");
+            } else {
+                $(".navbar .container-fluid #userPresent").hide();
+            }
+
+            //Clear username on signout and go to the console page
+            $("#signOut").click(function() {
+                localStorage.removeItem("username");
+                window.location.href = "Console.html";
+            });
+
+            $("#showCategory").click(function () {
+                $("#tablebox").prop({hidden: false});
+                $("#formbox").prop({hidden: true});
+                var mytable = $("#table1");
+                var form = $("#redirection").serialize();
+                $.ajax({
+                    url: 'http://' + ip + '/category/displayCategories',
+                    type: "GET",
+                    data: form,
+                    dataType: "json",
+                    success: function(data){
+
+                        $("#tableBody").empty();
+                        $("#table1 thead tr th[name=buttons]").remove();
+                        //create columns dynamically
+                        mytable.dynatable({
+                            features: {
+                                paginate: false,
+                                perPageSelect: false
+                            },
+                            dataset: {
+                                records: data
+                            }
+                        });
+                        mytable.data('dynatable').settings.dataset.records = data;
+                        mytable.data('dynatable').dom.update();
+                        $("#table1").each(function(){
+                            $(this).find('th').addClass('dynatableTH');
+                        })
+                        $("#table1").each(function(){
+                            $(this).find('td').addClass('centerTD');
+                        })
+                        $("#table1").each(function(){
+                            $(this).find('tbody').addClass('editBody');
+                        })
+                        mytable.data('dynatable').paginationPerPage.set(1000);
+
+                        $("#tablebox .dynatable-per-page").hide();
+
+                        $("#dynatable-pagination-links-table1").hide();
+
+                        $("#dynatable-query-search-table1").val("");
+
+                        $('#table1').SetEditable({
+                            columnsEd: "2",
+                            onDelete: function(columnsEd) {
+                                var name = columnsEd[0].childNodes[0].innerHTML;
+                                var size = columnsEd[0].childNodes[1].innerHTML;
+                                delCategory(name,size);
+                            },
+                            onEdit: function(columnsEd) {
+                                var name = columnsEd[0].childNodes[0].innerHTML;
+                                var size = columnsEd[0].childNodes[1].innerHTML;
+                                var weight = columnsEd[0].childNodes[2].innerHTML;
+                                editCategory(name,size,weight);
+                            }
+                        });
+                    }
+                });
+
+                function editCategory(name, size, weight) {
+                    var editString = "?category_name=" + name + "&category_size=" + size + "&category_weight=" + weight;
+
+                    $.ajax({
+                        url: 'http://' + ip + '/category/update' + editString,
+                        type: "GET",
+                        success: function(data) {
+                            if (data == 0) {
+                                alert("Organization successfully updated.");
+                            } else {
+                                alert("Organization information was not updated.")
+                            }
+                        }
+                    });
+                };
+
+                function delCategory(name, size) {
+                    var delString = "?category_name=" + name + "&category_size=" + size;
+
+                    $.ajax({
+                        url: 'http://' + ip + '/category/delete' + delString,
+                        type: "GET",
+                        success: function(data) {
+                            alert("Organization has been deleted.");
+                        }
+                    });
+                };
+            });
+
+            /* Function for limiting Dynatable's search field so it doesn't break Bootstable */
+            var lastSearch = "";
+            var currentSearch;
+            $(document).on("keypress", "#dynatable-query-search-table1", function(e) {
+                currentSearch = $("#dynatable-query-search-table1").val();
+                if (e.which == 13 && currentSearch != "" && currentSearch != lastSearch) {
+                    lastSearch = currentSearch;
+                    $("#table1 thead tr th[name=buttons]").remove();
+                    $('#table1').SetEditable({
+                        columnsEd: "1,2",
+                        onDelete: function(columnsEd) {
+                            var name = columnsEd[0].childNodes[0].innerHTML;
+                            delOrg(name);
+                        },
+                        onEdit: function(columnsEd) {
+                            var name = columnsEd[0].childNodes[0].innerHTML;
+                            var size = columnsEd[0].childNodes[1].innerHTML;
+                            var weight = columnsEd[0].childNodes[2].innerHTML;
+                            editCategory(name, size, weight);
+                        }
+                    });
+                }
+            });
+
+            $("#addCategory").click(function() {
+                $("#tablebox").prop({hidden: true});
+                $("#formbox").prop({hidden: false});
+            });
+
+            // Submit the form
+            $("#submit").click(function() {
+                var form = $("form").serialize();
+
+                if ($("#inputCategory").val() == "" || $("#inputCategorySize").val() == "" ||
+                    $("#inputCategoryWEight").val() == "") {
+                    alert("Please fill out all the information before submitting.");
+                } else {
+                    // ("" + form);
+                    $.ajax({
+                        url : 'http://' + ip + '/category/create',
+                        type : 'GET',
+                        data : form,
+                        dataType:'json',
+                        success : function(data) {
+                            if (data == 1) {
+                                $( "#successfulOrgCreation" ).dialog({
+                                    modal: true,
+                                    open: function(event, ui){
+                                        setTimeout(function(){
+                                            $("#successfulOrgCreation").dialog('close');
+                                            window.location.href = "category.html";
+                                        }, 1500);
+                                    }
+                                });
+                            } else {
+                                $( "#failedOrgCreation" ).dialog({
+                                    modal: true,
+                                    open: function(event, ui){
+                                        setTimeout(function(){
+                                            $("#failedOrgCreation").dialog('close');
+                                        }, 1500);
+                                    }
+                                });
+                            }
+                        },
+                        error : function(request,error) {
+                            alert("Org creation failed.");
+                        }
+                    });
+                }
+            });
+        });
+    </script>
 </head>
 <body>
+    <form id="redirection">
+        <input type="hidden" id="username" name="user_name">
+    </form>
 
+    <nav class="navbar navbar-inverse">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="Console.html">UWM Food Pantry</a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li><a href="Inventory.html">Inventory</a></li>
+                    <li><a href="Reports.html">Reports</a></li>
+                    <li><a href="Category.html">Categories</a></li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right" id="userAbsent">
+                    <li><a href="Login.html">Login</a></li>
+                    <li><a href="Register.html">Register</a></li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right" id="userPresent">
+                    <li><a id="user"></a></li>
+                    <li><a href="" id="signOut">Sign Out</a></li>
+                </ul>
+            </div><!-- /.navbar-collapse -->
+        </div><!-- /.container-fluid -->
+    </nav>
+
+    <div class="btn-group" align="center">
+        <button class="btn btn-primary" id="showCategory">Show Categories</button>
+        <button class="btn btn-primary" id="addCategory">Add Category</button>
+    </div>
+
+    <br><br>
+
+    <div class="container-fluid" id="formbox" hidden>
+        <form class="form-horizontal" name="categoryForm">
+            <div class="form-group col-lg-10 col-md-10 col-sm-10">
+                <label for="inputCategory" class="col-sm-2 control-label">Food Category:</label>
+                <div class="col-sm-10">
+                    <input type="text" name="category_name" class="form-control" id="inputCategory" placeholder="Food Category Name" required>
+                </div>
+            </div>
+
+            <div class="form-group col-lg-10 col-md-10 col-sm-10">
+                <label for="inputCategorySize" class="col-sm-2 control-label">Food Category Size:</label>
+                <div class="col-sm-10">
+                    <input type="text" name="category_size" class="form-control" id="inputCategorySize" placeholder="Food Category Size" required>
+                </div>
+            </div>
+            <div class="form-group col-lg-10 col-md-10 col-sm-10">
+                <label for="inputCategoryWeight" class="col-sm-2 control-label">Food Category Weight:</label>
+                <div class="col-sm-10">
+                    <input type="number" name="category_weight" class="form-control" id="inputCategoryWeight" placeholder="Food Category Weight" required>
+                </div>
+            </div>
+        </form>
+
+        <div class="col-sm-10">
+            <button id="submit" type="button" class="btn btn-default">Submit</button>
+        </div>
+
+        <div id="successfulOrgCreation" title="Organization Created" hidden="hidden">
+            <p>
+                <span class="ui-icon ui-icon-circle-check" style="float:left; margin:0 7px 50px 0;"></span>
+                Your Category has been successfully added.
+            </p>
+        </div>
+
+        <div id="failedOrgCreation" title="Organization Not Created" hidden="hidden">
+            <p>
+                <span class="ui-icon ui-icon-circle-check" style="float:left; margin:0 7px 50px 0;"></span>
+                Your Category was not created. Please try again.
+            </p>
+        </div>
+    </div>
+
+<br><br>
+    <div id="tablebox" hidden>
+        <table id="table1" align="center">
+            <thead>
+            <th data-dynatable-column="name">Category</th>
+            <th data-dynatable-column="size">Size</th>
+            <th data-dynatable-column="weight">Weight</th>
+            </thead>
+            <tbody id="tableBody">
+            </tbody>
+        </table>
+    </div>
 </body>
 </html>

@@ -28,7 +28,7 @@ public class DonationController {
 	
 	@Autowired
 	private IntDonationService donationService;
-	
+	/*
 	@GetMapping("input")
 	public @ResponseBody String inputDonation (
 			@RequestParam int donation,
@@ -48,7 +48,17 @@ public class DonationController {
 		return donationService.separateDonations(donation, org_name, user_name, deli, 
 				dairy, meat, produce, pantry, bakery, pet_food, nonfood, date, page);
 	}
-	
+
+	@GetMapping("input")
+	public @ResponseBody String addToInventory(
+			@RequestParam String user_name,
+			@RequestParam String category,
+			@RequestParam String size,
+			@RequestParam int amount) {
+
+
+
+	}*/
 //	@GetMapping("input")
 //	public @ResponseBody int inputDonation (
 //			@RequestParam String org_name,
@@ -58,21 +68,21 @@ public class DonationController {
 //		
 //		return donationDAO.inputDonation(org_name, category, weight, donation);
 //	}
-	
+	/*
 	@GetMapping("listOrg")
 	public @ResponseBody List<String> listOrg (
 			@RequestParam int donation) {
 		
 		return donationDAO.listOrg(donation);
 	}
-	
+
 	@GetMapping("listInfo")
 	public @ResponseBody List<Donation> listInfo (
 			@RequestParam String org_name,
 			@RequestParam int donation) {
 		
 		return donationDAO.listInfo(org_name, donation);
-	}
+	}*/
 	
 	@GetMapping("init")
 	public @ResponseBody String initDonationTable() {
@@ -80,13 +90,13 @@ public class DonationController {
 		
 		return "Donation table created";
 	}
-
+/*
 	@GetMapping("frequency")
 	public @ResponseBody List<String> frequency(@RequestParam String org_name) {
 
 		List<String> categories = donationDAO.getFrequency(org_name);
 		return categories;
-	}
+	}*/
 
 	@SuppressWarnings("unchecked")
 	@GetMapping("report")
@@ -103,23 +113,25 @@ public class DonationController {
 		
 		if (user_name != "")
 		{
-			donationDAO.inputPage(user_name, page);
-			donationService.reportTabPrediction(user_name, time, donation, type);
+			//donationDAO.inputPage(user_name, page);
+			//donationService.reportTabPrediction(user_name, time, donation, type);
 		}
 		//List<Donation> donationList = new ArrayList<Donation>();
 		//donationList = donationDAO.getReport(donation, time, type, start_date, end_date);
 		//return DonationService.convertToJson(type, donationList);
 		//List<Object> ListOfReportStuff = donationDAO.getReport(donation, time, type, start_date, end_date);
 		//List<Object> ListOfReportStuff = donationService.constructReport(donation, time, type, start_date, end_date);
-		JSONObject x = donationService.constructReport(donation, time, type, start_date, end_date);
+		//JSONObject x = donationService.constructReport(donation, time, type, start_date, end_date);
+		JSONObject x = null;
 		if (x.equals(null))
 		{
 			x = new JSONObject().put("JSON", "error");
 		}
+
 		System.out.println(x.toString());
 		return x.toString();
 	}
-
+/*
 	@GetMapping("widget")
 	public @ResponseBody List<String> widget(
 			@RequestParam String username) {
@@ -128,10 +140,11 @@ public class DonationController {
 
 		return widgetTimes;
 		//return null;
-	}
+	}*/
 
 	@GetMapping("showDonations")
-	public @ResponseBody String showDonations(@RequestParam String org_name){
+	public @ResponseBody String showDonations(@RequestParam String date){
+		/*
 		org_name = org_name.substring(9);
 		String replaceString=org_name.replace("%20"," ");
 		replaceString = replaceString.replaceAll("'", "''");
@@ -141,8 +154,8 @@ public class DonationController {
 			String name = x.getOrgName();
 			name = name.replaceAll("''", "'");
 			x.setOrgName(name);
-		}
-		String json = new Gson().toJson(listOfDonations);
+		}*/
+		String json = new Gson().toJson("x");
 		System.out.println(json);
 		return json;
 	}

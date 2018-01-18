@@ -27,8 +27,7 @@ public class CategoryController {
     private IntCategoryDAO categoryDAO;
 
     @GetMapping("create")
-    public @ResponseBody
-    int createCategory(
+    public @ResponseBody int createCategory(
             @RequestParam String category_name,
             @RequestParam String category_size,
             @RequestParam float category_weight) {
@@ -36,13 +35,43 @@ public class CategoryController {
     }
 
     @GetMapping("delete")
-    public @ResponseBody
-    int deleteCategory(
+    public @ResponseBody int deleteCategory(
             @RequestParam String category_name,
             @RequestParam String category_size
     ) {
+        System.out.println("cat_name= "+ category_name + " cat_size= "+ category_size);
         return categoryDAO.deleteCategory(category_name, category_size);
     }
+
+    @GetMapping("displayCategories")
+    public @ResponseBody List<Category> displayCategories()
+    {
+        return categoryDAO.displayCategories();
+    }
+
+    @GetMapping("update")
+    public @ResponseBody int updateOrg (
+            @RequestParam String category_name,
+            @RequestParam String category_size,
+            @RequestParam String category_weight) {
+
+        return categoryDAO.updateCategory(category_name, category_size, category_weight);
+    }
+
+    @GetMapping("list")
+    public @ResponseBody List<Category> listCategories() {
+
+        System.out.println("got into the list");
+        List<Category> lop = categoryDAO.listCategories();
+        for (Category x : lop) {
+            String name = x.getName();
+            name = name.replaceAll("''", "'");
+            x.setName(name);
+        }
+
+        return lop;
+    }
+
 }
 
     /*method below used to create table for user when they are going to add to the inventory

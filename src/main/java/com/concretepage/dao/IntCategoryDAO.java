@@ -27,4 +27,10 @@ public interface IntCategoryDAO {
     public int createCategory(String category_name, String category_size, float category_weight);
 
     public int deleteCategory(String category_name, String category_size);
+
+    public List<Category> displayCategories();
+
+    public int updateCategory(String category_name, String category_size, String category_weight);
+
+    public List<Category> listCategories();
 }

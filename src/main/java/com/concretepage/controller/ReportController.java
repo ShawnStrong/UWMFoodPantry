@@ -14,14 +14,14 @@ import com.concretepage.entity.Donation;
 import com.concretepage.service.IntReportService;
 
 @Controller
-@RequestMapping("donation")
+@RequestMapping("report")
 public class ReportController {
 
 	@Autowired
 	private IntReportDAO reportDAO;
 	
-	@Autowired
-	private IntReportService reportService;
+	//@Autowired
+	//private IntReportService reportService;
 	
 	@GetMapping("getInventory")
 	public @ResponseBody List<Donation> getInventory () {

@@ -29,6 +29,7 @@
     <script>
         $( document ).ready(function() {
 			var ip = location.host;
+
 			localStorage.setItem("serverIp", ip);
 			
             //Hide submit button until an org is selected
@@ -44,17 +45,46 @@
             } else {
                 $(".navbar .container-fluid #userPresent").hide();
             }
-            
+
+            //edit inventory button
+
+			//show inventory table and allow dynatable/boottable editing
+            var currentJSONString = "";
+            $("#showDonation").click()(function () {
+                if ($("#Date").val() == "") {
+                    alert("Please enter a date before generating the report.");
+                } else {
+
+                    $.ajax({
+                        url: 'http://' + ip + '/donation/showDonations',
+                        type: 'GET',
+                        data: form,
+                        dataType: 'json',
+                        success: function (json) {
+                            if (json != "")
+                            {
+
+                            }
+                            else
+							{
+
+							}
+                        }
+                    });
+                }
+                });
+            });
+
             //Clear username on signout and go to the console page
             $("#signOut").click(function() {
                localStorage.removeItem("username");
                 window.location.href = "Console.html";
             });
             
-            //Generate the list of organizations
+            //Generate the list of Categories
             $.ajax({
                 // The URL for the request
-                url: 'http://' + ip + '/org/list',
+                url: 'http://' + ip + '/category/list',
 
                 // Whether this is a POST or GET request
                 type: "GET",
@@ -768,7 +798,7 @@
 			<div class="row form-group">
 				<div class="col-lg-3 col-md-3 col-sm-1"></div>
 				<div class="col-lg-6 col-md-6 col-sm-10" id="inputPlace">
-					<label for="orgName">Organization Name:</label>
+					<label for="base">Category Name:</label>
 					<select class="form-control" id="base" name="org_name" required>
 
 					</select>
