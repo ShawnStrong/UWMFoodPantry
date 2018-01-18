@@ -72,6 +72,17 @@ public class CategoryController {
         return lop;
     }
 
+    @GetMapping("input")
+    public @ResponseBody int updateOrg (
+            @RequestParam String category_name,
+            @RequestParam String category_size,
+            @RequestParam String category_weight,
+            @RequestParam String category_quantity,
+            @RequestParam String user_name) {
+
+        return categoryDAO.addToInventory(category_name, category_size, category_weight, category_quantity, user_name);
+    }
+
 }
 
     /*method below used to create table for user when they are going to add to the inventory

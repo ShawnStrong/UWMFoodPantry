@@ -212,13 +212,11 @@
             $("#submit").click(function() {
                 var form = $("form").serialize();
 
-                if ($("#inputCategory").val() == "" || $("#inputCategorySize").val() == "" ||
-                    $("#inputCategoryWEight").val() == "") {
-                    alert("Please fill out all the information before submitting.");
+                if ($("#quantity").val() == "") {
+                    alert("Please input a quantity before submitting.");
                 } else {
-                    // ("" + form);
                     $.ajax({
-                        url : 'http://' + ip + '/category/create',
+                        url : 'http://' + ip + '/category/input',
                         type : 'GET',
                         data : form,
                         dataType:'json',
@@ -229,7 +227,6 @@
                                     open: function(event, ui){
                                         setTimeout(function(){
                                             $("#successfulOrgCreation").dialog('close');
-                                            window.location.href = "category.html";
                                         }, 1500);
                                     }
                                 });
@@ -256,9 +253,10 @@
                 if ($(".row #inputPlace #base").val().length > 0) {
                     var category =[];
                     var OrgsName = $("#inputPlace #base").serialize().toString();
+                    $(".row #test").children().remove();
                     $(document.createElement('label')).prop({for: 'quantity'}).appendTo(".row #test");
                     $("label[for='quantity']").html("Quantity:");
-                    $(document.createElement('input')).prop({type: "quantity", class: "form-control",  name: "quantity"}).appendTo(".row #test");
+                    $(document.createElement('input')).prop({type: "quantity", class: "form-control",  name: "quantity", id: "quantity"}).appendTo(".row #test");
 
                     $("button[type=submit]").show();
                     //<input type="number" class="form-control" id="quantity" name="quantity" value="0">
@@ -416,7 +414,7 @@
     <br><br>
 
     <div class="container-fluid" id="pageInfo" hidden>
-        <form action="/category/input">
+        <form>
 
             <div class="row form-group">
                 <div class="col-lg-3 col-md-3 col-sm-1"></div>
