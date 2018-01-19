@@ -53,8 +53,10 @@ public interface IntDonationDAO {
 	public int deleteDonation(String order_id);
 
 	public List<Donation> getDonations(int type, int donation, String startDate, String endDate);
-	
+
 	public List<Donation> getDonationTimesSorted(int donation, String start_Date, String end_Date);
+
+	public List<Donation> listCategories();
 
 	//public List<Object> getInventory(int donation, int time, int type, String start_date, String end_date);
 }

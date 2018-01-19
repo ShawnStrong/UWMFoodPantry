@@ -81,6 +81,7 @@ public class CategoryController {
         return categoryDAO.addToInventory(category_name, category_quantity, user_name);
     }
 
+
 }
 
     /*method below used to create table for user when they are going to add to the inventory
