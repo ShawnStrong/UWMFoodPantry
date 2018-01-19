@@ -149,36 +149,11 @@
                         $("#tablebox .dynatable-per-page").hide();
                         $("#dynatable-pagination-links-table1").hide();
                         $("#dynatable-query-search-table1").val("");
+						
+						var inputCell = '<input type="text">';
+						mytable.find('tbody tr').append(inputCell);
                     }
                 });
-
-                function editCategory(name, size, weight) {
-                    var editString = "?category_name=" + name + "&category_size=" + size + "&category_weight=" + weight;
-
-                    $.ajax({
-                        url: 'http://' + ip + '/category/update' + editString,
-                        type: "GET",
-                        success: function(data) {
-                            if (data == 0) {
-                                alert("Organization successfully updated.");
-                            } else {
-                                alert("Organization information was not updated.")
-                            }
-                        }
-                    });
-                };
-
-                function delCategory(name, size) {
-                    var delString = "?category_name=" + name + "&category_size=" + size;
-
-                    $.ajax({
-                        url: 'http://' + ip + '/category/delete' + delString,
-                        type: "GET",
-                        success: function(data) {
-                            alert("Organization has been deleted.");
-                        }
-                    });
-                };
             });
 
             $("#addInventory").click(function() {
