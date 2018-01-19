@@ -28,6 +28,13 @@ public class DonationDAO implements IntDonationDAO {
 	private EntityManager entityManager;
 
 	@Override
+	public List<Donation> listCategories(){
+		Query q = entityManager.createNativeQuery("SELECT * FROM inventory_table order by category_name;", Donation.class);
+		List<Donation> donations = q.getResultList();
+		return donations;
+	}
+
+	@Override
 	public int inputDonation(String org_name, String user_name, String category, int weight, int donation, String date) {
 
 		org_name = org_name.replaceAll("'", "''");

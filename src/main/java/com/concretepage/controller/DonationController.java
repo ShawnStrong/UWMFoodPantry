@@ -160,6 +160,18 @@ public class DonationController {
 		return json;
 	}
 
+	@GetMapping("getInventory")
+	public @ResponseBody String getInventory(){
+		List<Donation> lop = donationDAO.listCategories();
+		for (Donationd x : lop) {
+			String name = x.getName();
+			name = name.replaceAll("''", "'");
+			x.setName(name);
+		}
+
+		return lop;
+	}
+
 	@GetMapping("deleteDonation")
 	public @ResponseBody String deleteDonation(@RequestParam String order_id){
 		System.out.println(order_id);
