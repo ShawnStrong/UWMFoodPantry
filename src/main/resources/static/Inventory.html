@@ -118,16 +118,12 @@
                 $("#tablebox").prop({hidden: false});
                 $("#formbox").prop({hidden: true});
                 var mytable = $("#table1");
-                var form = $("#redirection").serialize();
                 $.ajax({
-                    url: 'http://' + ip + '/donation/updateInventory',
+                    url: 'http://' + ip + '/donation/getInventory',
                     type: "GET",
-                    data: form,
                     dataType: "json",
                     success: function(data){
-
                         $("#tableBody").empty();
-                        $("#table1 thead tr th[name=buttons]").remove();
                         //create columns dynamically
                         mytable.dynatable({
                             features: {
@@ -150,27 +146,9 @@
                             $(this).find('tbody').addClass('editBody');
                         })
                         mytable.data('dynatable').paginationPerPage.set(1000);
-
                         $("#tablebox .dynatable-per-page").hide();
-
                         $("#dynatable-pagination-links-table1").hide();
-
                         $("#dynatable-query-search-table1").val("");
-
-                        $('#table1').SetEditable({
-                            columnsEd: "2",
-                            onDelete: function(columnsEd) {
-                                var name = columnsEd[0].childNodes[0].innerHTML;
-                                var size = columnsEd[0].childNodes[1].innerHTML;
-                                delCategory(name,size);
-                            },
-                            onEdit: function(columnsEd) {
-                                var name = columnsEd[0].childNodes[0].innerHTML;
-                                var size = columnsEd[0].childNodes[1].innerHTML;
-                                var weight = columnsEd[0].childNodes[2].innerHTML;
-                                editCategory(name,size,weight);
-                            }
-                        });
                     }
                 });
 
@@ -328,7 +306,6 @@
                                 }
                             }
                             $("#tableBody").empty();
-                            $("#donationtable thead tr th[name=buttons]").remove();
                             //create columns dynamically
                             mytable.dynatable({
                                 features: {
@@ -351,7 +328,6 @@
                                 $(this).find('tbody').addClass('editBody');
                             })
                             mytable.data('dynatable').paginationPerPage.set(10000);
-
                             $("#tablebox .dynatable-per-page").hide();
                             $("#dynatable-pagination-links-table1").hide();
                             $("#dynatable-query-search-table1").val("");
@@ -461,7 +437,9 @@
             <thead>
             <th data-dynatable-column="name">Category</th>
             <th data-dynatable-column="size">Size</th>
-            <th data-dynatable-column="weight">Weight</th>
+            <th data-dynatable-column="weight">Weight (oz)</th>
+			<th data-dynatable-column="prev_quantity">Previous Quantity</th>
+			<th>New Quantity</th>
             </thead>
             <tbody id="tableBody">
             </tbody>
