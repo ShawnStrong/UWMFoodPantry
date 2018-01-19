@@ -19,6 +19,7 @@ import com.concretepage.entity.Donation;
 import com.concretepage.entity.SummaryReport;
 import com.concretepage.entity.DetailedReport;
 import com.concretepage.entity.Frequency;
+import com.concretepage.entity.Inventory;
 
 @Transactional
 @Repository
@@ -28,9 +29,9 @@ public class DonationDAO implements IntDonationDAO {
 	private EntityManager entityManager;
 
 	@Override
-	public List<Donation> listCategories(){
-		Query q = entityManager.createNativeQuery("SELECT * FROM inventory_table order by category_name;", Donation.class);
-		List<Donation> donations = q.getResultList();
+	public List<Inventory> listCategories(){
+		Query q = entityManager.createNativeQuery("SELECT * FROM inventory_table order by category_name;", Inventory.class);
+		List<Inventory> donations = q.getResultList();
 		return donations;
 	}
 

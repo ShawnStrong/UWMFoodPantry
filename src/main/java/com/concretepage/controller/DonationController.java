@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.concretepage.dao.IntDonationDAO;
 import com.concretepage.entity.Donation;
+import com.concretepage.entity.Inventory;
 import com.concretepage.service.IntDonationService;
 import com.google.gson.Gson;
 import com.concretepage.service.DonationService;
@@ -161,12 +162,12 @@ public class DonationController {
 	}
 
 	@GetMapping("getInventory")
-	public @ResponseBody List<Donation> getInventory(){
-		List<Donation> lop = donationDAO.listCategories();
-		for (Donation x : lop) {
-			String name = x.getCategoryName();
+	public @ResponseBody List<Inventory> getInventory(){
+		List<Inventory> lop = donationDAO.listCategories();
+		for (Inventory x : lop) {
+			String name = x.getName();
 			name = name.replaceAll("''", "'");
-			x.setCategoryName(name);
+			x.setName(name);
 		}
 
 		return lop;

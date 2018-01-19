@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Inventory</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <script src="http://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script src="http://rawgithub.com/indrimuska/jquery-editable-select/master/dist/jquery-editable-select.min.js"></script>
+    <link href="http://rawgithub.com/indrimuska/jquery-editable-select/master/dist/jquery-editable-select.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/annyang/2.6.0/annyang.min.js"></script>
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+    <!-- dynatable css and js -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Dynatable/0.3.1/jquery.dynatable.css">
+    <link rel="stylesheet" type="text/css" href="dynatableTH.css">
+    <!--<script src="jquery.dynatable.js"></script> -->
+    <script type='text/javascript' src='https://s3.amazonaws.com/dynatable-docs-assets/js/jquery.dynatable.js'></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/annyang/2.6.0/annyang.min.js"></script>
+    <script src="donationsBootstable.js"></script>
+
+    <style>
+        #suggestionWidget p:hover{
+            cursor: pointer;
+        }
+    </style>
+
+    <script>
+        $( document ).ready(function() {
+            var ip = location.host;
+            localStorage.setItem("serverIp", ip);
+
+            //Hide submit button until an org is selected
+            $("button[type=submit]").hide();
+
+            //Add username to the navbar if it exists in local storage
+            var name = localStorage.getItem("username");
+            $("#username").prop("value", name);
+
+            if (name != null && name.length > 0) {
+                $(".navbar .container-fluid #userAbsent").hide();
+                $(".navbar .container-fluid #userPresent li #user").html("Welcome " + name + "!");
+            } else {
+                $(".navbar .container-fluid #userPresent").hide();
+            }
+
+            //Clear username on signout and go to the console page
+            $("#signOut").click(function () {
+                localStorage.removeItem("username");
+                window.location.href = "Console.html";
+            });
+
+            //Generate the list of organizations
+            $.ajax({
+                // The URL for the request
+                url: 'http://' + ip + '/donation/update',
+
+                // Whether this is a POST or GET request
+                type: "GET",
+
+                // The type of data we expect back
+                dataType: "json",
+            })
+            // Code to run if the request succeeds (is done);
+            // The response is passed to the function
+                .done(function (data) {
+                    $.each(data, function () {
+                        $(document.createElement('option')).prop({text: this.name}).appendTo(".row #inputPlace #base");
+                        $(document.createElement('option')).prop({text: this.name}).appendTo(".row #showPlace #showOrgSelect");
+                    })
+                    $('.row #inputPlace #base').editableSelect();
+                    $('.row #showPlace #showOrgSelect').editableSelect();
+                })
+                // Code to run if the request fails; the raw request and
+                // status codes are passed to the function
+                .fail(function (xhr, status, errorThrown) {
+                    alert("Sorry, there was a problem!");
+                });
+        });
+
+        //Adds donations into the inventory
+        $.ajax({
+            // The URL for the request
+            url: 'http://' + ip + '/donation/addToInventory',
+
+            // Whether this is a POST or GET request
+            type: "GET",
+
+            // The type of data we expect back
+            dataType: "json",
+        })
+        // Code to run if the request succeeds (is done);
+        // The response is passed to the function
+            .done(function (data) {
+                $.each(data, function () {
+                    $(document.createElement('option')).prop({text: this.name}).appendTo(".row #inputPlace #base");
+                    $(document.createElement('option')).prop({text: this.name}).appendTo(".row #showPlace #showOrgSelect");
+                })
+                $('.row #inputPlace #base').editableSelect();
+                $('.row #showPlace #showOrgSelect').editableSelect();
+            })
+            // Code to run if the request fails; the raw request and
+            // status codes are passed to the function
+            .fail(function (xhr, status, errorThrown) {
+                alert("Sorry, there was a problem!");
+            });
+        });
+
+            </script>
+
+</head>
+<body>
+
+</body>
+</html>
