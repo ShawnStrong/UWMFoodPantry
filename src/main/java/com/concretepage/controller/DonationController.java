@@ -161,12 +161,12 @@ public class DonationController {
 	}
 
 	@GetMapping("getInventory")
-	public @ResponseBody String getInventory(){
+	public @ResponseBody List<Donation> getInventory(){
 		List<Donation> lop = donationDAO.listCategories();
-		for (Donationd x : lop) {
-			String name = x.getName();
+		for (Donation x : lop) {
+			String name = x.getCategoryName();
 			name = name.replaceAll("''", "'");
-			x.setName(name);
+			x.setCategoryName(name);
 		}
 
 		return lop;
