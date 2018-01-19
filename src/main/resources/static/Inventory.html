@@ -221,17 +221,18 @@
                         data : form,
                         dataType:'json',
                         success : function(data) {
-                            if (data == 1) {
-                                $( "#successfulOrgCreation" ).dialog({
+                            if (data == 0) {
+                                $( "#successfulDonation" ).dialog({
                                     modal: true,
                                     open: function(event, ui){
                                         setTimeout(function(){
                                             $("#successfulOrgCreation").dialog('close');
+                                            window.location.href = "inventory.html";
                                         }, 1500);
                                     }
                                 });
                             } else {
-                                $( "#failedOrgCreation" ).dialog({
+                                $( "#failedDonation" ).dialog({
                                     modal: true,
                                     open: function(event, ui){
                                         setTimeout(function(){
