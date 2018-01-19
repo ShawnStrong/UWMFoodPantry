@@ -186,7 +186,15 @@ public class CategoryDAO implements IntCategoryDAO {
             query.executeUpdate();
         }
 
-
+        query = entityManager.createNativeQuery(
+                "INSERT INTO donation_table SET donation_type=1, category_name=?1, category_size=?2, " +
+                        "category_weight=?3, category_quantity=?4, user_name=?5");
+        query.setParameter(1, category_name);
+        query.setParameter(2, category_size);
+        query.setParameter(3, categoryWeight);
+        query.setParameter(4, categoryQuantity);
+        query.setParameter(5, user_name);
+        query.executeUpdate();
 
         return 0;
     }
