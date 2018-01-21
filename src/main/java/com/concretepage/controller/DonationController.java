@@ -20,6 +20,9 @@ import com.google.gson.Gson;
 import com.concretepage.service.DonationService;
 import com.google.gson.Gson;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 @Controller
 @RequestMapping("donation")
 public class DonationController {
@@ -179,5 +182,90 @@ public class DonationController {
 		int response = donationDAO.deleteDonation(order_id);
 		String json = new Gson().toJson(response);
 		return json;
+	}
+
+	@GetMapping("displayPreviousEntries")
+    public @ResponseBody List<Donation> displayCategories()
+    {
+        return donationDAO.displayPreviousEntries();
+    }
+
+	@GetMapping("updateDonations")
+	public @ResponseBody int updateDonations(@RequestParam String x){
+		System.out.println(x);
+		String newQuantityPatternString = "(\"new_quantity\",\")(.*?)(\",\"category_name\")";
+        String catNamePatternString = "(\"category_name\",\")(.*?)(\",\"category_size\")";
+        String catWeightPatternString = "(\"category_weight\",\")(.*?)(\",\"category_quantity\")";
+        String catSizePatternString = "(\"category_size\",\")(.*?)(\",\"category_weight\")";
+        String catQuantityPatternString = "(\"category_quantity\",\")(.*?)(\",\"new_quantity\")";
+        String lastNewQuantity = "(\"new_quantity\",\")(\\d*?)(\"])";
+        String getUserName = "(,username,)(.*?)(,)(.*)(\"category_name\",\")";
+        String userName = "";
+
+        Pattern p = Pattern.compile(getUserName);
+        Matcher m = p.matcher(x);
+        while (m.find())
+        {
+            System.out.println("User Name: "+m.group(2));
+            userName = m.group(2);
+        }
+
+        List<String> newQuantities = new ArrayList<String>();
+        List<String> categories = new ArrayList<String>();
+        List<String> sizes = new ArrayList<String>();
+        List<String> weights = new ArrayList<String>();
+        List<String> oldQuantities = new ArrayList<String>();
+
+        p = Pattern.compile(catNamePatternString);
+        Matcher m1 = p.matcher(x);
+        while (m1.find())
+        {
+            System.out.println("Cat Name: "+m1.group(2));
+            categories.add(m1.group(2));
+        }
+        p = Pattern.compile(newQuantityPatternString);
+        Matcher m2 = p.matcher(x);
+        while (m2.find())
+        {
+            if (m2.group(2).isEmpty())
+            {
+                return 0;
+            }
+            System.out.println("new quantity: "+m2.group(2));
+            newQuantities.add(m2.group(2));
+        }
+        p = Pattern.compile(catWeightPatternString);
+        Matcher m3 = p.matcher(x);
+        while (m3.find())
+        {
+            System.out.println("Weight: "+m3.group(2));
+            weights.add(m3.group(2));
+        }
+        p = Pattern.compile(catSizePatternString);
+        Matcher m4 = p.matcher(x);
+        while (m4.find())
+        {
+            System.out.println("Size: "+m4.group(2));
+            sizes.add(m4.group(2));
+        }
+        p = Pattern.compile(catQuantityPatternString);
+        Matcher m5 = p.matcher(x);
+        while (m5.find())
+        {
+            System.out.println("old quantity: " + m5.group(2));
+            oldQuantities.add(m5.group(2));
+        }
+        p = Pattern.compile(lastNewQuantity);
+        Matcher m6 = p.matcher(x);
+        while (m6.find())
+        {
+            if (m6.group(2).isEmpty())
+            {
+                return 0;
+            }
+            System.out.println("last new quantity: "+ m6.group(2));
+            newQuantities.add(m6.group(2));
+        }
+        return donationDAO.updateDonations(userName, categories, sizes, weights, oldQuantities, newQuantities);
 	}
 }
