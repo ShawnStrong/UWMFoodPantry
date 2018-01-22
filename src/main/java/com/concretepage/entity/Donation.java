@@ -20,7 +20,7 @@ public class Donation {
 	
 	private float category_weight;
 	
-	private int category_amount;
+	private int category_quantity;
 	
 	private String user_name;
 
@@ -30,14 +30,14 @@ public class Donation {
 	
 	public Donation(int donation_id, int donation_type, 
 			String category_name, String category_size,
-			int category_weight, int category_amount, 
+			int category_weight, int category_quantity,
 			String user_name, String ts) {
 		this.donation_id = donation_id;
 		this.donation_type = donation_type;
 		this.category_name = category_name;
 		this.category_size = category_size;
 		this.category_weight = category_weight;
-		this.category_amount = category_amount;
+		this.category_quantity = category_quantity;
 		this.user_name = user_name;
 		this.ts = ts;
 	}
@@ -80,12 +80,12 @@ public class Donation {
 		this.category_weight = category_weight;
 	}
 	
-	public int getCategoryAmount() {
-		return category_amount;
+	public int getCategoryQuantity() {
+		return category_quantity;
 	}
 	
-	public void setCategoryAmount(int category_amount) {
-		this.category_amount = category_amount;
+	public void setCategoryQuantity(int category_quantity) {
+		this.category_quantity = category_quantity;
 	}
 	
 	public String getUserName() {

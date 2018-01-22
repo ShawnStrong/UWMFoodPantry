@@ -29,6 +29,82 @@ public class DonationDAO implements IntDonationDAO {
 	private EntityManager entityManager;
 
 	@Override
+	public List<Donation> displayPreviousEntries()
+	{
+		System.out.print("I'm in display previous entries!!!");
+		Query query = entityManager.createNativeQuery(
+				"SELECT * FROM donation_table ORDER BY ts;", Donation.class);
+
+		List<Donation> donations = query.getResultList();
+		int index = -1;
+		int donationType = -1;
+		for (int i = donations.size() - 1; i >= 0; i--)
+		{
+			if (i == donations.size() - 1)
+			{
+				donationType = donations.get(i).getDonationType();
+			}
+			else
+			{
+				if (donations.get(i).getDonationType() != donationType)
+				{
+					index = i + 1;
+					break;
+				}
+			}
+		}
+		if (index == -1)
+		{
+			return null;
+		}
+		List<Donation> donationsToReturn = new ArrayList<Donation>();
+		for (int i = index; i < donations.size(); i++)
+		{
+			donationsToReturn.add(donations.get(i));
+		}
+		return donationsToReturn;
+	}
+
+	@Override
+	public int updateDonations(String user_name, List<String> categories, List<String> sizes, List<String> weights, List<String> oldQuantities, List<String> newQuantities)
+	{
+		//String user_name = "admin";
+		for (int i = 0; i < categories.size(); i++)
+		{
+			int quantityDonated = 0;
+			int oldQuantity = Integer.parseInt(oldQuantities.get(i));
+			int newQuantity = Integer.parseInt(newQuantities.get(i));
+			quantityDonated = oldQuantity - newQuantity;
+			if(quantityDonated < 0)
+			{
+				return 0;
+			}
+			else if(quantityDonated == 0)
+			{
+				continue;
+			}
+			Query query = entityManager.createNativeQuery(
+					"INSERT INTO donation_table SET donation_type=0, category_name=?1, category_size=?2, " +
+							"category_weight=?3, category_quantity=?4, user_name=?5");
+			query.setParameter(1, categories.get(i));
+			query.setParameter(2, sizes.get(i));
+			query.setParameter(3, weights.get(i));
+			query.setParameter(4, quantityDonated);
+			query.setParameter(5, user_name);
+			query.executeUpdate();
+
+			query = entityManager.createNativeQuery(
+					"UPDATE inventory_table SET category_quantity=?1" +
+							" Where (category_name = ?2 and category_size = ?3)");
+			query.setParameter(1, newQuantity);
+			query.setParameter(2, categories.get(i));
+			query.setParameter(3, sizes.get(i));
+			query.executeUpdate();
+		}
+		return 1;
+	}
+
+	@Override
 	public List<Inventory> listCategories(){
 		Query q = entityManager.createNativeQuery("SELECT * FROM inventory_table order by category_name;", Inventory.class);
 		List<Inventory> donations = q.getResultList();

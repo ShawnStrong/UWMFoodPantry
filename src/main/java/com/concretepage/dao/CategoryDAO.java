@@ -177,6 +177,7 @@ public class CategoryDAO implements IntCategoryDAO {
             {
                 quantity = x.getQuantity();
             }
+            quantity += categoryQuantity;
             query = entityManager.createNativeQuery(
                     "UPDATE inventory_table SET category_quantity=?1" +
                             " Where (category_name = ?2 and category_size = ?3)");

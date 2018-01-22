@@ -111,12 +111,17 @@
             $("#addInventory").click(function() {
                 $("#showOrgBox").prop({hidden: true});
                 $("#tablebox").prop({hidden: true});
+                $("#formbox").prop({hidden: true});
                 $("#pageInfo").prop({hidden: false});
+                $("#tableboxEdit").prop({hidden: true});
             });
 
             $("#updateInventory").click(function () {
+                $("#showOrgBox").prop({hidden: true});
                 $("#tablebox").prop({hidden: false});
                 $("#formbox").prop({hidden: true});
+                $("#pageInfo").prop({hidden: true});
+                $("#tableboxEdit").prop({hidden: true})
                 var mytable = $("#table1");
                 $.ajax({
                     url: 'http://' + ip + '/donation/getInventory',
@@ -157,18 +162,220 @@
                         $("#table1").each(function(){
                             $(this).find('tbody').addClass('editBody');
                         })
+                        mytable.data('dynatable').paginationPerPage.set(1000);
+                        $("#tablebox .dynatable-per-page").hide();
+                        $("#dynatable-pagination-links-table1").hide();
+                        $("#dynatable-query-search-table1").val("");
+
+                        editTd();
+						//var inputCell = '<input type="text">';
+						//mytable.find('tbody tr #newQuantity').append(inputCell);
                     }
                 });
             });
 
-            $("#addInventory").click(function() {
+            function editTd() {
+                var rows = document.getElementById('table1').rows;
+                for (var i = 1; i < rows.length; i++) {
+                    var row = rows[i];
+                    for (var j = row.cells.length -1; j < row.cells.length; j++) {
+                        row.cells[j].innerHTML ="";
+                        var input = document.createElement('input');
+                        var num = i
+                        var numToString = num.toString();
+                        input.type = "text";
+                        input.id = "input_" + numToString;
+                        row.cells[j].appendChild(input);
+                    };
+                };
+            }
+
+            $("#pastEntries").click(function() {
+                $("#showOrgBox").prop({hidden: true});
                 $("#tablebox").prop({hidden: true});
-                $("#formbox").prop({hidden: false});
+                $("#formbox").prop({hidden: true});
+                $("#pageInfo").prop({hidden: true});
+                $("#tableboxEdit").prop({hidden: false});
+                var mytable = $("#table2");
+                var form = $("#redirection").serialize();
+                $.ajax({
+                    url: 'http://' + ip + '/donation/displayPreviousEntries',
+                    type: "GET",
+                    data: form,
+                    dataType: "json",
+                    success: function(data){
+
+                        $("#tableBody2").empty();
+                        $("#table2 thead tr th[name=buttons]").remove();
+                        //create columns dynamically
+                        mytable.dynatable({
+                            features: {
+                                paginate: false,
+                                perPageSelect: false
+                            },
+                            dataset: {
+                                records: data
+                            }
+                        });
+                        mytable.data('dynatable').settings.dataset.records = data;
+                        mytable.data('dynatable').dom.update();
+                        $("#table2").each(function(){
+                            $(this).find('th').addClass('dynatableTH');
+                        })
+                        $("#table2").each(function(){
+                            $(this).find('td').addClass('centerTD');
+                        })
+                        $("#table2").each(function(){
+                            $(this).find('tbody').addClass('editBody');
+                        })
+                        mytable.data('dynatable').paginationPerPage.set(1000);
+
+                        $("#tableboxEdit .dynatable-per-page").hide();
+
+                        $("#dynatable-pagination-links-table1").hide();
+
+                        $("#dynatable-query-search-table1").val("");
+
+                        $('#table2').SetEditable({
+                            columnsEd: "4",
+                            onDelete: function(columnsEd) {
+                                var name = columnsEd[0].childNodes[0].innerHTML;
+                                var size = columnsEd[0].childNodes[1].innerHTML;
+                                delCategory(name,size);
+                            },
+                            onEdit: function(columnsEd) {
+                                var quantity = columnsEd[0].childNodes[4].innerHTML;
+                                editCategory(quantity);
+                            }
+                        });
+                    }
+                });
+
+                function editCategory(quantity) {
+                    var editString = "?quantity=" + quantity;
+
+                    $.ajax({
+                        url: 'http://' + ip + '/category/update' + editString,
+                        type: "GET",
+                        success: function(data) {
+                            if (data == 0) {
+                                alert("Organization successfully updated.");
+                            } else {
+                                alert("Organization information was not updated.")
+                            }
+                        }
+                    });
+                };
+
+                function delCategory(name, size) {
+                    var delString = "?category_name=" + name + "&category_size=" + size;
+
+                    $.ajax({
+                        url: 'http://' + ip + '/category/delete' + delString,
+                        type: "GET",
+                        success: function(data) {
+                            alert("Organization has been deleted.");
+                        }
+                    });
+                };
+            });
+
+            $("#extractTable").click(function () {
+                /*
+                var rows = document.getElementById('table1').rows;
+                for (var i = 1; i < rows.length; i++) {
+                    var num = i;
+                    var numToString = num.toString();
+                    var row = rows[i];
+                    for (var j = 0; j < row.cells.length - 1; j++) {
+                       var x = row.cells[j].innerHTML;
+                       alert(x);
+                    };
+                    var inputToUse = "input_" + numToString;
+                    var x = document.getElementById(inputToUse).value
+                    alert(x);
+                };*/
+                var username =document.getElementsByTagName("input")[0].value;
+                var jsonObj = [];
+                var rows = document.getElementById('table1').rows;
+                for (var i = 1; i < rows.length; i++) {
+                    var num = i;
+                    var numToString = num.toString();
+                    var row = rows[i];
+                    for (var j = 0; j < row.cells.length - 1; j++) {
+                        var x = row.cells[j].innerHTML;
+                        //alert(x);
+                        if (j == 0)
+                        {
+                            var stringToUse = "category_name";
+                            jsonObj.push(stringToUse);
+                            jsonObj.push(x);
+                        }
+                        else if (j == 1)
+                        {
+                            var stringToUse = "category_size";
+                            jsonObj.push(stringToUse);
+                            jsonObj.push(x);
+                        }
+                        else if (j == 2)
+                        {
+                            var stringToUse = "category_weight";
+                            jsonObj.push(stringToUse);
+                            jsonObj.push(x);
+                        }
+                        else
+                        {
+                            var stringToUse = "category_quantity";
+                            jsonObj.push(stringToUse);
+                            jsonObj.push(x);
+                        }
+                    };
+                    var inputToUse = "input_" + numToString;
+                    var x = document.getElementById(inputToUse).value
+                    //alert(x);
+                    var stringToUse = "new_quantity";
+                    jsonObj.push(stringToUse);
+                    jsonObj.push(x);
+                };
+                var myJsonString = "x=,username," + username + "," + JSON.stringify(jsonObj);
+                alert(myJsonString);
+                $.ajax({
+                    url : 'http://' + ip + '/donation/updateDonations',
+                    type : 'GET',
+                    data : myJsonString,
+                    dataType:'json',
+                    success : function(data) {
+                        if (data == 1) {
+                            $( "#successfulDonation" ).dialog({
+                                modal: true,
+                                open: function(event, ui){
+                                    setTimeout(function(){
+                                        $("#successfulOrgCreation").dialog('close');
+                                        window.location.href = "Inventory.html";
+                                    }, 1500);
+                                }
+                            });
+                        } else {
+                            $( "#failedDonation" ).dialog({
+                                modal: true,
+                                open: function(event, ui){
+                                    setTimeout(function(){
+                                        $("#failedOrgCreation").dialog('close');
+                                    }, 1500);
+                                }
+                            });
+                        }
+                    },
+                    error : function(request,error) {
+                        alert("Org creation failed.");
+                    }
+                });
             });
 
             // Submit the form
             $("#submit").click(function() {
                 var form = $("form").serialize();
+                alert(form);
 
                 if ($("#quantity").val() == "") {
                     alert("Please input a quantity before submitting.");
@@ -419,10 +626,31 @@
             <th data-dynatable-column="size">Size</th>
             <th data-dynatable-column="weight">Weight (oz)</th>
 			<th data-dynatable-column="quantity">Previous Quantity</th>
+			<th id="newQuantity">New Quantity</th>
             </thead>
             <tbody id="tableBody">
             </tbody>
         </table>
+        <button type="button" class="btn btn-primary" id="extractTable">
+            Enter
+        </button>
+    </div>
+
+    <div id="tableboxEdit" hidden>
+        <table id="table2" align="center">
+            <thead>
+            <th data-dynatable-column="donationType">Added/Updated</th>
+            <th data-dynatable-column="categoryName">Category</th>
+            <th data-dynatable-column="categorySize">Size</th>
+            <th data-dynatable-column="categoryWeight">Weight</th>
+            <th data-dynatable-column="categoryQuantity">Quantity Entered</th>
+            </thead>
+            <tbody id="tableBody2">
+            </tbody>
+        </table>
+        <button type="button" class="btn btn-primary" id="editTable">
+            Enter
+        </button>
     </div>
 
 </body>

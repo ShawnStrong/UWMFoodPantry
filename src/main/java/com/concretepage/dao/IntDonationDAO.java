@@ -59,5 +59,9 @@ public interface IntDonationDAO {
 
 	public List<Inventory> listCategories();
 
+	public List<Donation> displayPreviousEntries();
+
+	public int updateDonations(String user_name, List<String> categories, List<String> sizes, List<String> weights, List<String> oldQuantities, List<String> newQuantities);
+
 	//public List<Object> getInventory(int donation, int time, int type, String start_date, String end_date);
 }
