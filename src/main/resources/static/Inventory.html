@@ -148,11 +148,6 @@
                         $("#dynatable-pagination-links-table1").hide();
                         $("#dynatable-query-search-table1").val("");
 						
-						// add input column
-						mytable.find('thead tr').append('<th>New Quantity</th>');
-						var inputCell = '<input type="text">';
-						mytable.find('tbody tr').append(inputCell);
-						
 						$("#table1").each(function(){
                             $(this).find('th').addClass('dynatableTH');
                         })
@@ -162,14 +157,8 @@
                         $("#table1").each(function(){
                             $(this).find('tbody').addClass('editBody');
                         })
-                        mytable.data('dynatable').paginationPerPage.set(1000);
-                        $("#tablebox .dynatable-per-page").hide();
-                        $("#dynatable-pagination-links-table1").hide();
-                        $("#dynatable-query-search-table1").val("");
 
                         editTd();
-						//var inputCell = '<input type="text">';
-						//mytable.find('tbody tr #newQuantity').append(inputCell);
                     }
                 });
             });
