@@ -101,7 +101,7 @@ public class DonationController {
 		List<String> categories = donationDAO.getFrequency(org_name);
 		return categories;
 	}*/
-
+/*
 	@SuppressWarnings("unchecked")
 	@GetMapping("report")
 	public @ResponseBody String getReport(
@@ -187,7 +187,22 @@ public class DonationController {
 	@GetMapping("displayPreviousEntries")
     public @ResponseBody List<Donation> displayCategories()
     {
-        return donationDAO.displayPreviousEntries();
+        List<Donation> x = donationDAO.displayPreviousEntries();
+        System.out.println("x exists");
+        return x;
+    }
+
+    @GetMapping("changeLastEntry")
+    public @ResponseBody int changeLastEntry(
+            @RequestParam String quantity,
+            @RequestParam String donation_type,
+            @RequestParam String category_name,
+            @RequestParam String category_size
+    ){
+	    System.out.println("donation_type: " + donation_type + " category_name: " + category_name +
+            " category_size: " + category_size + " quantity: " + quantity);
+	    return donationDAO.changeLastEntry(quantity, donation_type, category_name, category_size);
+	    //return 1;
     }
 
 	@GetMapping("updateDonations")

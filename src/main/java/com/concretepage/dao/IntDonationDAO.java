@@ -35,6 +35,8 @@ public interface IntDonationDAO {
 
 	void initDonationTable();
 
+	//public List<Donation> getDonationTimesSorted(int donation, String start_Date, String end_Date);
+
 	List<Object> getReport(int donation, int time, int type, String start_date, String end_date);
 
 	//public List<String> getWidgetOrgs(String date, String username);
@@ -55,11 +57,13 @@ public interface IntDonationDAO {
 
 	public List<Donation> getDonations(int type, int donation, String startDate, String endDate);
 
-	public List<Donation> getDonationTimesSorted(int donation, String start_Date, String end_Date);
+//	public List<Donation> getDonationTimesSorted(int donation, String start_Date, String end_Date);
 
 	public List<Inventory> listCategories();
 
 	public List<Donation> displayPreviousEntries();
+
+	public int changeLastEntry(String quantity, String donation_type, String category_name, String category_size);
 
 	public int updateDonations(String user_name, List<String> categories, List<String> sizes, List<String> weights, List<String> oldQuantities, List<String> newQuantities);
 

@@ -1,6 +1,7 @@
 package com.concretepage.dao;
 
 import java.util.List;
+import java.util.ArrayList;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -17,6 +18,38 @@ public class ReportDAO implements IntReportDAO {
 	
 	@PersistenceContext
 	private EntityManager entityManager;
+
+	public List<Donation> getDonations(int type, int donation, String start_Date, String end_Date)
+	{
+		Query query = null;
+		if (type == 0)
+		{
+			query = entityManager.createNativeQuery(
+					"SELECT * FROM `donation_table`"
+							+ " WHERE (ts >= '" + start_Date + " 00:00:00' AND ts <= '"
+							+ end_Date + " 23:59:59') AND "
+							+ "donation_type=" + donation + " ORDER BY category_name, ts;", Donation.class);
+		}
+		else
+		{
+			query = entityManager.createNativeQuery(
+					"SELECT * FROM `donation_table`"
+							+ " WHERE (ts >= '" + start_Date + "' AND ts <= '"
+							+ end_Date + "') AND "
+							+ "donation_type=" + donation + " ORDER BY category_name, ts;", Donation.class);
+		}
+		return query.getResultList();
+	}
+
+	public List<Donation> getDonationTimesSorted(int donation, String start_Date, String end_Date) {
+		Query query = null;
+		query = entityManager.createNativeQuery(
+				"SELECT * FROM `donation_table`"
+						+ " WHERE (date >= '" + start_Date + "' AND date <= '"
+						+ end_Date + "') AND "
+						+ "donation=" + donation + " ORDER BY date;", Donation.class);
+		return query.getResultList();
+	}
 
 	@SuppressWarnings("unchecked")
 	@Override

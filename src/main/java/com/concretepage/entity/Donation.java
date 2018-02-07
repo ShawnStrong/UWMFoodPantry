@@ -30,7 +30,7 @@ public class Donation {
 	
 	public Donation(int donation_id, int donation_type, 
 			String category_name, String category_size,
-			int category_weight, int category_quantity,
+			float category_weight, int category_quantity,
 			String user_name, String ts) {
 		this.donation_id = donation_id;
 		this.donation_type = donation_type;

@@ -29,15 +29,144 @@ public class DonationDAO implements IntDonationDAO {
 	private EntityManager entityManager;
 
 	@Override
+	public int changeLastEntry(String quantity, String donation_type, String category_name, String category_size){
+		Query query = entityManager.createNativeQuery(
+				"SELECT * FROM inventory_table WHERE (category_name = ?1 and category_size = ?2)", Inventory.class);
+		query.setParameter(1, category_name);
+		query.setParameter(2, category_size);;
+		List<Inventory> inventoryList = query.getResultList();
+		System.out.println(inventoryList.get(inventoryList.size() -1).getQuantity());
+		int inventoryQuantity = inventoryList.get(inventoryList.size() -1).getQuantity();
+
+		if(Integer.parseInt(donation_type) == 0)
+		{
+
+
+			query = entityManager.createNativeQuery(
+					"SELECT * FROM donation_table WHERE (donation_type = ?1 and category_name = ?2 and category_size = ?3)", Donation.class);
+			query.setParameter(1, donation_type);
+			query.setParameter(2, category_name);
+			query.setParameter(3, category_size);;
+			List<Donation> donations = query.getResultList();
+			System.out.println(donations.get(donations.size()- 1).getCategoryName());
+
+			int catQ = donations.get(donations.size()- 1).getCategoryQuantity();
+			int newCategoryQuantity = 0;
+			int enteredQuantity= Integer.parseInt(quantity);
+			if(inventoryQuantity > enteredQuantity)
+			{
+				newCategoryQuantity = (inventoryQuantity - enteredQuantity) + catQ;
+				if (newCategoryQuantity < 0)
+				{
+					return 1;
+				}
+			}
+			else
+			{
+				newCategoryQuantity = catQ - (enteredQuantity - inventoryQuantity);
+				if (newCategoryQuantity < 0)
+				{
+					return 1;
+				}
+			}
+			query = entityManager.createNativeQuery(
+					"UPDATE inventory_table SET category_quantity=?1" +
+							" Where (category_name = ?2 and category_size = ?3)");
+			query.setParameter(1, quantity);
+			query.setParameter(2, category_name);
+			query.setParameter(3, category_size);
+			query.executeUpdate();
+			String TimeStamp = donations.get(donations.size()- 1).getTs();
+
+			query = entityManager.createNativeQuery(
+					"UPDATE donation_table SET category_quantity=?1" +
+							" Where (donation_type = ?2 and category_name = ?3 and category_size = ?4 and ts = ?5)");
+
+			query.setParameter(1, newCategoryQuantity);
+			query.setParameter(2, donation_type);
+			query.setParameter(3, category_name);
+			query.setParameter(4, category_size);
+			query.setParameter(5, TimeStamp);
+			query.executeUpdate();
+		}
+		else
+		{
+			query = entityManager.createNativeQuery(
+					"SELECT * FROM donation_table WHERE (donation_type = ?1 and category_name = ?2 and category_size = ?3)", Donation.class);
+			query.setParameter(1, donation_type);
+			query.setParameter(2, category_name);
+			query.setParameter(3, category_size);;
+			List<Donation> donations = query.getResultList();
+			System.out.println(donations.get(donations.size()- 1).getCategoryName());
+			int donationTableCategoryQuantity = donations.get(donations.size()- 1).getCategoryQuantity();
+
+			String TimeStamp = donations.get(donations.size()- 1).getTs();
+			query = entityManager.createNativeQuery(
+					"UPDATE donation_table SET category_quantity=?1" +
+							" Where (donation_type = ?2 and category_name = ?3 and category_size = ?4 and ts = ?5)");
+
+			query.setParameter(1, quantity);
+			query.setParameter(2, donation_type);
+			query.setParameter(3, category_name);
+			query.setParameter(4, category_size);
+			query.setParameter(5, TimeStamp);
+			query.executeUpdate();
+
+			int newInventoryQuantity = 0;
+			int newCategoryQuantity = 0;
+			if(Integer.parseInt(quantity) > donationTableCategoryQuantity)
+			{
+				newCategoryQuantity = Integer.parseInt(quantity) - donationTableCategoryQuantity;
+				newInventoryQuantity = inventoryQuantity + newCategoryQuantity;
+			}
+			else
+			{
+				newCategoryQuantity = donationTableCategoryQuantity - Integer.parseInt(quantity);
+				newInventoryQuantity = inventoryQuantity - newCategoryQuantity;
+			}
+			query = entityManager.createNativeQuery(
+					"UPDATE inventory_table SET category_quantity=?1" +
+							" Where (category_name = ?2 and category_size = ?3)");
+			query.setParameter(1, newInventoryQuantity);
+			query.setParameter(2, category_name);
+			query.setParameter(3, category_size);
+			query.executeUpdate();
+		}
+
+		return 0;
+	}
+
+	public List<Donation> getDonationTimesSorted(int donation, String start_Date, String end_Date) {
+		Query query = null;
+		query = entityManager.createNativeQuery(
+				"SELECT * FROM `donation_table`"
+						+ " WHERE (ts >= '" + start_Date + " 00:00:00' AND ts <= '"
+						+ end_Date + " 23:59:59') AND "
+						+ "donation=" + donation + " ORDER BY ts;", Donation.class);
+		return query.getResultList();
+	}
+
+	@Override
 	public List<Donation> displayPreviousEntries()
 	{
-		System.out.print("I'm in display previous entries!!!");
+		System.out.println("I'm in display previous entries!!!");
 		Query query = entityManager.createNativeQuery(
 				"SELECT * FROM donation_table ORDER BY ts;", Donation.class);
 
+		System.out.println("I got to the part where I execute the donation_table query");
 		List<Donation> donations = query.getResultList();
+		for (Donation x: donations)
+		{
+			System.out.println("Name = "  + x.getCategoryName());
+		}
+        System.out.println("I executed the donation_table query");
+        Query query1 = entityManager.createNativeQuery(
+                "SELECT * FROM inventory_table;", Inventory.class);
+        List<Inventory> inventoryList = query1.getResultList();
+
 		int index = -1;
 		int donationType = -1;
+		boolean breaked = false;
 		for (int i = donations.size() - 1; i >= 0; i--)
 		{
 			if (i == donations.size() - 1)
@@ -49,10 +178,16 @@ public class DonationDAO implements IntDonationDAO {
 				if (donations.get(i).getDonationType() != donationType)
 				{
 					index = i + 1;
+					breaked = true;
 					break;
 				}
 			}
 		}
+		if (donations.size() > 0 && !breaked)
+		{
+			index = 0;
+		}
+		System.out.println("DonationType = " + donationType);
 		if (index == -1)
 		{
 			return null;
@@ -62,6 +197,85 @@ public class DonationDAO implements IntDonationDAO {
 		{
 			donationsToReturn.add(donations.get(i));
 		}
+		if (donationType == 1)
+		{
+			for (Donation x : donationsToReturn)
+			{
+				System.out.print("Name = "  + x.getCategoryName());
+			}
+			return donationsToReturn;
+		}
+		List<Donation> newdonationsToReturn = new ArrayList<Donation>();
+		for(Donation x : donationsToReturn)
+		{
+			if(donationType == 0)
+			{
+				int a = x.getCategoryQuantity();
+				String b = x.getCategoryName();
+				String c = x.getCategorySize();
+				float d = x.getCategoryWeight();
+				String e = x.getUserName();
+				String f = x.getTs();
+				int h = x.getDonationId();
+				int r = 0;
+				for(int j = 0; j < inventoryList.size(); j++)
+				{
+					Inventory y = inventoryList.get(j);
+					System.out.println("Inventory y = " + y.getName());
+					if (x.getCategoryName().equals(y.getName()) && x.getCategorySize().equals(y.getSize()))
+					{
+						int q = y.getQuantity();
+						r = q;
+						System.out.println("BREAK!!!");
+						break;
+					}
+				}
+				Donation g = new Donation(h,0,b,c,d,r,e,f);
+				newdonationsToReturn.add(g);
+			}
+		}
+		if (donationType==0)
+		{
+			return newdonationsToReturn;
+		}
+		/*
+		public Donation(int donation_id, int donation_type,
+			String category_name, String category_size,
+			int category_weight, int category_quantity,
+			String user_name, String ts)
+		 */
+		//doesn't work for some reason
+		/*
+		if (donationType == 0)
+        {
+            System.out.println("In the if statement");
+			System.out.println("Donations size = " + donationsToReturn.size());
+            for(int i = 0; i < donationsToReturn.size(); i++)
+            {
+                Donation x = donationsToReturn.get(i);
+				System.out.println("Donation x = " + x.getCategoryName());
+                for(int j = 0; j < inventoryList.size(); j++)
+                {
+                    Inventory y = inventoryList.get(j);
+					System.out.println("Inventory y = " + y.getName());
+                    if (x.getCategoryName().equals(y.getName()) && x.getCategorySize().equals(y.getSize()))
+                    {
+                        int q = y.getQuantity();
+                        x.setCategoryQuantity(q);
+						System.out.println("BREAK!!!");
+                        break;
+                    }
+                }
+            }
+			System.out.println("Out of the For Loop!");
+            List<Donation> newDonationsToReturn = new ArrayList<Donation>();
+            for (Donation x: donationsToReturn)
+			{
+				System.out.println("Category Name: " + x.getCategoryName() + " quantity: " + x.getCategoryQuantity());
+				newDonationsToReturn.add(x);
+			}
+			return newDonationsToReturn;
+        }*/
 		return donationsToReturn;
 	}
 
@@ -69,6 +283,38 @@ public class DonationDAO implements IntDonationDAO {
 	public int updateDonations(String user_name, List<String> categories, List<String> sizes, List<String> weights, List<String> oldQuantities, List<String> newQuantities)
 	{
 		//String user_name = "admin";
+		//If the last thing you did was update, return 2
+		Query query1 = entityManager.createNativeQuery(
+				"SELECT * FROM donation_table;", Donation.class);
+		List<Donation> donations = query1.getResultList();
+		if ( donations.get(donations.size()-1).getDonationType() == 0)
+		{
+			return 2;
+		}/*
+		int index = -1;
+		int donationType = -1;
+		boolean breaked = false;
+		for (int i = donations.size() - 1; i >= 0; i--)
+		{
+			if (i == donations.size() - 1)
+			{
+				donationType = donations.get(i).getDonationType();
+			}
+			else
+			{
+				if (donations.get(i).getDonationType() != donationType)
+				{
+					index = i + 1;
+					breaked = true;
+					break;
+				}
+			}
+		}
+		if (donations.size() > 0 && !breaked)
+		{
+			index = 0;
+		}*/
+
 		for (int i = 0; i < categories.size(); i++)
 		{
 			int quantityDonated = 0;
@@ -433,7 +679,7 @@ public class DonationDAO implements IntDonationDAO {
 		return query.getResultList();
 	}
 	
-	public List<Donation> getDonationTimesSorted(int donation, String start_Date, String end_Date) {
+	/*public List<Donation> getDonationTimesSorted(int donation, String start_Date, String end_Date) {
 		Query query = null;
 		query = entityManager.createNativeQuery(
 				"SELECT * FROM `donation_table`"
@@ -441,7 +687,7 @@ public class DonationDAO implements IntDonationDAO {
 						+ end_Date + "') AND "
 						+ "donation=" + donation + " ORDER BY date;", Donation.class);
 		return query.getResultList();
-	}
+	}*/
 
 	@SuppressWarnings("unchecked")
 	@Override

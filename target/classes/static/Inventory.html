@@ -133,7 +133,8 @@
                         mytable.dynatable({
                             features: {
                                 paginate: false,
-                                perPageSelect: false
+                                perPageSelect: false,
+								sort: false
                             },
                             dataset: {
                                 records: data
@@ -141,7 +142,13 @@
                         });
                         mytable.data('dynatable').settings.dataset.records = data;
                         mytable.data('dynatable').dom.update();
-                        $("#table1").each(function(){
+                        
+                        mytable.data('dynatable').paginationPerPage.set(1000);
+                        $("#tablebox .dynatable-per-page").hide();
+                        $("#dynatable-pagination-links-table1").hide();
+                        $("#dynatable-query-search-table1").val("");
+						
+						$("#table1").each(function(){
                             $(this).find('th').addClass('dynatableTH');
                         })
                         $("#table1").each(function(){
@@ -150,14 +157,8 @@
                         $("#table1").each(function(){
                             $(this).find('tbody').addClass('editBody');
                         })
-                        mytable.data('dynatable').paginationPerPage.set(1000);
-                        $("#tablebox .dynatable-per-page").hide();
-                        $("#dynatable-pagination-links-table1").hide();
-                        $("#dynatable-query-search-table1").val("");
 
                         editTd();
-						//var inputCell = '<input type="text">';
-						//mytable.find('tbody tr #newQuantity').append(inputCell);
                     }
                 });
             });
@@ -184,6 +185,7 @@
                 $("#formbox").prop({hidden: true});
                 $("#pageInfo").prop({hidden: true});
                 $("#tableboxEdit").prop({hidden: false});
+                $("#extractTable").prop({hidden: true});
                 var mytable = $("#table2");
                 var form = $("#redirection").serialize();
                 $.ajax({
@@ -192,7 +194,18 @@
                     data: form,
                     dataType: "json",
                     success: function(data){
-
+                        //alert(data);
+                        for (var donationType in data){
+                            //alert(data[donationType].donationType);
+                            if(data[donationType].donationType == 0)
+                            {
+                                data[donationType].donationType = "Updated";
+                            }
+                            else
+                            {
+                                data[donationType].donationType = "Added";
+                            }
+                        }
                         $("#tableBody2").empty();
                         $("#table2 thead tr th[name=buttons]").remove();
                         //create columns dynamically
@@ -232,24 +245,38 @@
                                 delCategory(name,size);
                             },
                             onEdit: function(columnsEd) {
+                                var donation_type = columnsEd[0].childNodes[0].innerHTML;
+                                if (donation_type == "Updated")
+                                {
+                                    donation_type = 0;
+                                }
+                                else
+                                {
+                                    donation_type = 1;
+                                }
+                                var category_name = columnsEd[0].childNodes[1].innerHTML;
+                                var category_size = columnsEd[0].childNodes[2].innerHTML;
                                 var quantity = columnsEd[0].childNodes[4].innerHTML;
-                                editCategory(quantity);
+                                editCategory(quantity, donation_type, category_name, category_size);
                             }
                         });
                     }
                 });
 
-                function editCategory(quantity) {
-                    var editString = "?quantity=" + quantity;
+                function editCategory(quantity, donation_type, category_name, category_size) {
+                    var editString = "?quantity=" + quantity + "&donation_type=" + donation_type + "&category_name=" + category_name +
+                        "&category_size=" + category_size;
 
                     $.ajax({
-                        url: 'http://' + ip + '/category/update' + editString,
+                        url: 'http://' + ip + '/donation/changeLastEntry' + editString,
                         type: "GET",
                         success: function(data) {
                             if (data == 0) {
                                 alert("Organization successfully updated.");
                             } else {
-                                alert("Organization information was not updated.")
+                                alert("Organization information was not updated because you would be entering a negative " +
+                                    "number into your outgoing donations.")
+                                window.location.href = "inventory.html";
                             }
                         }
                     });
@@ -326,7 +353,7 @@
                     jsonObj.push(x);
                 };
                 var myJsonString = "x=,username," + username + "," + JSON.stringify(jsonObj);
-                alert(myJsonString);
+                //alert(myJsonString);
                 $.ajax({
                     url : 'http://' + ip + '/donation/updateDonations',
                     type : 'GET',
@@ -343,7 +370,11 @@
                                     }, 1500);
                                 }
                             });
-                        } else {
+                        } else if ( data == 2) {
+                            alert("You have already updated the inventory, If you would like to edit any entries click on the " +
+                                "Edit Entries tab.");
+                            window.location.href = "Inventory.html";
+                        }else {
                             $( "#failedDonation" ).dialog({
                                 modal: true,
                                 open: function(event, ui){
@@ -363,7 +394,7 @@
             // Submit the form
             $("#submit").click(function() {
                 var form = $("form").serialize();
-                alert(form);
+                //alert(form);
 
                 if ($("#quantity").val() == "") {
                     alert("Please input a quantity before submitting.");
@@ -384,7 +415,11 @@
                                         }, 1500);
                                     }
                                 });
-                            } else {
+                            } else if (data == 2) {
+                                alert("You have already added this item. If you would like to add more of this item " +
+                                    "to the inventory go to the Edit Entries tab.");
+                                window.location.href = "inventory.html";
+                            }else {
                                 $( "#failedDonation" ).dialog({
                                     modal: true,
                                     open: function(event, ui){
@@ -612,7 +647,7 @@
             <thead>
             <th data-dynatable-column="name">Category</th>
             <th data-dynatable-column="size">Size</th>
-            <th data-dynatable-column="weight">Weight (oz)</th>
+            <th data-dynatable-column="weight">Weight (Oz)</th>
 			<th data-dynatable-column="quantity">Previous Quantity</th>
 			<th id="newQuantity">New Quantity</th>
             </thead>
@@ -630,15 +665,12 @@
             <th data-dynatable-column="donationType">Added/Updated</th>
             <th data-dynatable-column="categoryName">Category</th>
             <th data-dynatable-column="categorySize">Size</th>
-            <th data-dynatable-column="categoryWeight">Weight</th>
+            <th data-dynatable-column="categoryWeight">Weight (Oz)</th>
             <th data-dynatable-column="categoryQuantity">Quantity Entered</th>
             </thead>
             <tbody id="tableBody2">
             </tbody>
         </table>
-        <button type="button" class="btn btn-primary" id="editTable">
-            Enter
-        </button>
     </div>
 
 </body>

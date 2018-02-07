@@ -185,12 +185,13 @@
             // Submit the form
             $("#submit").click(function() {
                 var form = $("form").serialize();
+                alert(form);
 
                 if ($("#startDate").val() == "" || $("#endDate").val() == "") {
                     alert("Please enter a date before generating the report.");
                 } else {
                     $.ajax({
-                        url : 'http://' + ip + '/donation/report',
+                        url : 'http://' + ip + '/report/report',
                         type : 'GET',
                         data : form,
                         dataType:'json',
@@ -270,6 +271,50 @@
                 }
             });
 
+            $("#inventory").click(function () {
+                $("#tablebox").prop({hidden: false});
+                var mytable = $("#table1");
+                $.ajax({
+                    url: 'http://' + ip + '/donation/getInventory',
+                    type: "GET",
+                    dataType: "json",
+                    success: function(data){
+                        $("#tableBody").empty();
+                        //create columns dynamically
+                        mytable.dynatable({
+                            features: {
+                                paginate: false,
+                                perPageSelect: false
+                            },
+                            dataset: {
+                                records: data
+                            }
+                        });
+                        mytable.data('dynatable').settings.dataset.records = data;
+                        mytable.data('dynatable').dom.update();
+                        $("#table1").each(function(){
+                            $(this).find('th').addClass('dynatableTH');
+                        })
+                        $("#table1").each(function(){
+                            $(this).find('td').addClass('centerTD');
+                        })
+                        $("#table1").each(function(){
+                            $(this).find('tbody').addClass('editBody');
+                        })
+                        mytable.data('dynatable').paginationPerPage.set(1000);
+                        $("#tablebox .dynatable-per-page").hide();
+                        $("#dynatable-pagination-links-table1").hide();
+                        $("#dynatable-query-search-table1").val("");
+
+                        $("#dl").click(function(){
+                            $("#table1").table2csv();
+                        })
+
+                        ``
+                    }
+                });
+            });
+
 			/* any time a column is resorted, reload css */
 			$(document).on('click', ".dynatable-sort-header", function() {
 				$("#table1").each(function(){
@@ -292,36 +337,36 @@
 </head>
 
 <body>
-<nav class="navbar navbar-inverse">
-    <div class="container-fluid">
-        <!-- Brand and toggle get grouped for better mobile display -->
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="Console.html">Just One More Ministry</a>
-        </div>
+    <nav class="navbar navbar-inverse">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="Console.html">UWM Food Pantry</a>
+            </div>
 
-        <!-- Collect the nav links, forms, and other content for toggling -->
-        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-            <ul class="nav navbar-nav">
-                <li><a href="Organizations.html">Organizations</a></li>
-                <li><a href="Donations.html">Donations</a></li>
-                <li><a href="Reports.html">Reports</a></li>
-            </ul>
-            <ul class="nav navbar-nav navbar-right" id="userAbsent">
-                <li><a href="Login.html">Login</a></li>
-                <li><a href="Register.html">Register</a></li>
-            </ul>
-            <ul class="nav navbar-nav navbar-right" id="userPresent">
-                <li><a id="user"></a></li>
-                <li><a href="" id="signOut">Sign Out</a></li>
-            </ul>
-        </div><!-- /.navbar-collapse -->
-    </div><!-- /.container-fluid -->
-</nav>
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li><a href="Inventory.html">Inventory</a></li>
+                    <li><a href="Reports.html">Reports</a></li>
+                    <li><a href="Category.html">Categories</a></li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right" id="userAbsent">
+                    <li><a href="Login.html">Login</a></li>
+                    <li><a href="Register.html">Register</a></li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right" id="userPresent">
+                    <li><a id="user"></a></li>
+                    <li><a href="" id="signOut">Sign Out</a></li>
+                </ul>
+            </div><!-- /.navbar-collapse -->
+        </div><!-- /.container-fluid -->
+    </nav>
 
 
 <h1 align="center">Generate a Report</h1>
@@ -347,9 +392,6 @@
             </label>
             <label class="btn btn-primary" id="weeklyLabel">
                 <input type="radio" name="time" value="0"autocomplete="off" id="weekly"> Weekly
-            </label>
-			<label class="btn btn-primary" id="dailyLabel">
-                <input type="radio" name="time" value="3"autocomplete="off" id="daily"> Daily
             </label>
         </div>
         <div class="btn-group col-lg-4" data-toggle="buttons">
@@ -377,41 +419,22 @@
     <div class="row col-lg-4">
         <button type="submit" class="btn btn-primary" id="submit">Submit</button>
         <button class="btn btn-primary" id="dl">Download Report</button>
+        <button class="btn btn-primary" id="inventory">View Inventory</button>
     </div>
 </div>
 
-
-<div id="tablebox">
-    <!--
-            <table id="table1" align="center">
-                <thead id="header">
-                </thead>
-                <tbody id="body">
-                </tbody>
-            </table>
-    -->
-</div>
-
-<!--
-<form method="get" action="/donation/report">
-  <input type="radio" name="donation" value="1" checked> Incoming<br>
-  <input type="radio" name="donation" value="0"> Outgoing<br><br>
-  <input type="radio" name="time" value="2" checked> Yearly<br>
-  <input type="radio" name="time" value="1"> Monthly<br>
-  <input type="radio" name="time" value="0"> Weekly<br><br>
-  <input type="radio" name="type" value="1" checked> Summary<br>
-  <input type="radio" name="type" value="0"> Descriptive<br>
-  Enter a start date:<br>
-  <input type="date" name="start_date"><br>
-  Enter an end date:<br>
-  <input type="date" name="end_date"><br><br>
-  <br>
-  <input type="submit" value="Submit"><br>
-
-</form>
-
-<a href='Console.html' class='button'>back</a>
--->
+    <div id="tablebox" hidden>
+        <table id="table1" align="center">
+            <thead>
+            <th data-dynatable-column="name">Category</th>
+            <th data-dynatable-column="size">Size</th>
+            <th data-dynatable-column="weight">Weight (oz)</th>
+            <th data-dynatable-column="quantity">Quantity</th>
+            </thead>
+            <tbody id="tableBody">
+            </tbody>
+        </table>
+    </div>
 
 </body>
 </html>

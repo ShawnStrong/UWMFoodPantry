@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.concretepage.entity.Category;
 import com.concretepage.entity.Inventory;
+import com.concretepage.entity.Donation;
 
 @Transactional
 @Repository
@@ -141,6 +142,46 @@ public class CategoryDAO implements IntCategoryDAO {
         category_name = category_name.substring(0,category_name.lastIndexOf(" "));
         System.out.println("Category Name: " + category_name);
         System.out.println("Category Size: " + category_size);
+        //if this item has been added return 2
+        Query query1 = entityManager.createNativeQuery(
+                "SELECT * FROM donation_table;", Donation.class);
+        List<Donation> donations = query1.getResultList();
+		int index = -1;
+		int donationType = -1;
+		boolean breaked = false;
+		String Name = "";
+		String Size = "";
+		for (int i = donations.size() - 1; i >= 0; i--)
+		{
+		    Name = donations.get(i).getCategoryName();
+		    Size = donations.get(i).getCategorySize();
+			if (i == donations.size() - 1)
+			{
+				donationType = donations.get(i).getDonationType();
+                if ((category_name.equals(Name) && category_size.equals(Size)) && (donationType == 1))
+                {
+                    return 2;
+                }
+			}
+			else
+			{
+                if ((category_name.equals(Name) && category_size.equals(Size)) && (donations.get(i).getDonationType() == 1))
+                {
+                    return 2;
+                }
+				if (donations.get(i).getDonationType() != donationType)
+				{
+					index = i + 1;
+					breaked = true;
+					break;
+				}
+			}
+		}/*
+		if (donations.size() > 0 && !breaked)
+		{
+			index = 0;
+		}*/
+
         //get weight
         Query query = entityManager.createNativeQuery(
                 "SELECT * FROM category_table WHERE (category_name='" +

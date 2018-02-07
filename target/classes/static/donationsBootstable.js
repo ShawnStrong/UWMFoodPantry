@@ -11,6 +11,9 @@ Boots_table
   var params = null;  //parámetros
   var colsEdi =null;
   var newColHtml = '<div class="btn-group pull-right">'+
+  '<button id="bEdit" type="button" class="btn btn-sm btn-default" onclick="rowEdit(this);">' +
+'<span class="glyphicon glyphicon-pencil" > </span>'+
+'</button>'+
 '<button id="bElim" type="button" class="btn btn-sm btn-default" onclick="rowElim(this);">' +
 '<span class="glyphicon glyphicon-trash" > </span>'+
 '</button>'+
@@ -74,7 +77,7 @@ function IterarCamposEdit($cols, tarea) {
 function FijModoNormal(but) {
     $(but).parent().find('#bAcep').hide();
     $(but).parent().find('#bCanc').hide();
-    //$(but).parent().find('#bEdit').show();
+    $(but).parent().find('#bEdit').show();
     $(but).parent().find('#bElim').show();
     var $row = $(but).parents('tr');  //accede a la fila
     $row.attr('id', '');  //quita marca
